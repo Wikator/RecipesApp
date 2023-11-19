@@ -1,0 +1,68 @@
+﻿@inject ICommentService CommentService
+@rendermode InteractiveAuto
+
+@if (CommentList is not null && RecipeId is not null)
+{
+    foreach (var comment in CommentList)
+    {
+        <div class="card mb-2">
+            <div class="card-title">
+                @(comment.Author ?? "<DELETED USER>")
+            </div>
+            <div class="card-body">
+                @comment.Text
+            </div>
+        </div>
+    }
+
+
+    @if (model is not null)
+    {
+        <AuthorizeView>
+            <Authorized Context="authContext">
+                <button class="btn btn-danger mb-3" @onclick="(_ => model = null)">Discard comment</button>
+                <EditForm Model="model" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="mb-3">
+                        <InputTextArea id="name" class="form-control" @bind-Value="model.Text" />
+                    </div>
+                    <button class="btn btn-info mb-3" type="submit">Add!</button>
+                </EditForm>
+            </Authorized>
+            <NotAuthorized>
+                <RedirectToLogin />
+            </NotAuthorized>
+        </AuthorizeView>
+        
+    }
+    else
+    {
+        <button class="btn btn-info mb-3" @onclick="(_ => model = new CommentUpsertDto() { RecipeId = RecipeId.Value })">Add comment</button>
+    }
+
+    
+}
+
+
+@code {
+    [Parameter, EditorRequired] public int? RecipeId { get; init; }
+    [Parameter, EditorRequired] public List<CommentReadOnlyDto>? CommentList { get; init; }
+    private CommentUpsertDto? model;
+
+    async Task HandleSubmit()
+    {
+        if (model is null || CommentList is null)
+            return;
+
+        Console.WriteLine(model.RecipeId);
+        Console.WriteLine(model.Text);
+
+        var result = await CommentService.AddComment(model);
+
+        if (result.Result is not null)
+        {
+            CommentList.Add(result.Result);
+            model = null;
+        }
+    }
+}

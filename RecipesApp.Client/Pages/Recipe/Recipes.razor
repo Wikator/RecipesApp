@@ -1,0 +1,62 @@
+﻿@page "/recipes"
+@inject IRecipeService RecipeService
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveAutoRenderMode(prerender: false))
+
+<h3>Recipes</h3>
+
+<button class="btn btn-dark" @onclick="@(_ => NavigationManager.NavigateTo("/recipes/create"))">Create new</button>
+
+<div class="page-size-chooser">
+    Items per page:
+    <select @bind="@pagination.ItemsPerPage">
+        <option>5</option>
+        <option>10</option>
+        <option>20</option>
+        <option>50</option>
+    </select>
+</div>
+
+<QuickGrid ItemsProvider="recipeProvider" Pagination="@pagination">
+    <TemplateColumn Title="Picture">
+        <div class="flex items-center">
+            <img src="@(context.ImageUrl)" alt="@context.Name" width="200" height="150" />
+        </div>     
+    </TemplateColumn>
+    <PropertyColumn Property="@(r => r.Name)" />
+    <PropertyColumn Title="Author" Property="@(r => r.Author.UserName)" />
+    <TemplateColumn Title="Action">
+        <button class="btn btn-info" @onclick="@(_ => NavigationManager.NavigateTo($"recipes/details/{context.Id}"))">Show</button>
+    </TemplateColumn>
+</QuickGrid>
+
+<Paginator State="@pagination" />
+
+
+@code {
+    PaginationState pagination = new PaginationState { ItemsPerPage = 5 };
+    GridItemsProvider<RecipeReadOnlyDto>? recipeProvider;
+
+    protected override void OnInitialized()
+    {
+        recipeProvider = async (req) =>
+        {
+            try
+            {
+                var response = await RecipeService.GetPagedItemsAsync(req.StartIndex / req.Count + 1 ?? 1, req.Count ?? int.MaxValue);
+                
+                if (response.Result is null)
+                    return GridItemsProviderResult.From(Array.Empty<RecipeReadOnlyDto>(), 0);
+
+                return GridItemsProviderResult.From(response.Result, response.Result.TotalCount);
+            }
+            catch
+            {
+                return GridItemsProviderResult.From(Array.Empty<RecipeReadOnlyDto>(), 0);
+            } 
+        };      
+    }
+
+    private GridItemsProviderResult<RecipeReadOnlyDto> EmptyProvider() =>
+        GridItemsProviderResult.From(Array.Empty<RecipeReadOnlyDto>(), 0);
+}

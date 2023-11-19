@@ -1,0 +1,12 @@
+﻿@if (Message is not null)
+{
+    <div class="mb-3">
+        <div class="alert alert-danger" role="alert">
+            @Message
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string? Message { get; set; }
+}

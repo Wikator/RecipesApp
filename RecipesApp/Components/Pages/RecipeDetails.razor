@@ -1,0 +1,55 @@
+﻿@page "/recipes/details/{id:int}"
+@inject IRecipeService RecipeService
+@inject NavigationManager NavigationManager
+@attribute [StreamRendering]
+
+<h3>RecipeDetails</h3>
+
+@if (recipe is null)
+{
+    <div class="alert alert-info">Loading...</div>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-img-top">
+            <img src="@recipe.ImageUrl" alt="recipe-image" width="500" height="300" />
+        </div>
+        <div class="card-title">
+            @recipe.Name
+        </div>
+        <div class="card-body">
+            @recipe.Text
+        </div>
+        <div class="card-footer">
+            <NavLink href=@($"recipes/update/{recipe.Id}") class="btn btn-warning">Update</NavLink>
+        </div>
+    </div>
+
+    <Comments CommentList="recipe.Comments" RecipeId="recipe.Id" />
+
+    <NavLink href="recipes" class="btn btn-dark mb-3">Back to list</NavLink>
+}
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private RecipeReadOnlyDetailsDto? recipe;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id is null)
+        {
+            NavigationManager.NavigateTo("recipes");
+        }
+        else
+        {
+            var result = await RecipeService.GetByIdAsync(Id.Value);
+
+            if (result.Result is null)
+                NavigationManager.NavigateTo("recipes");
+            else
+                recipe = result.Result;
+        }
+    }
+}

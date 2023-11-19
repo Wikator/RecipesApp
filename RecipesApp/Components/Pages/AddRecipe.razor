@@ -1,0 +1,61 @@
+﻿@*
+@page "/recipes/create"
+@inject NavigationManager NavigationManager
+@inject IRecipeService RecipeService
+@attribute [Authorize]
+
+
+<h3>AddRecipe</h3>
+
+<ErrorMessage Message="@error" />
+
+<EditForm FormName="recipe-create" Model="Model" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="Model.Name" />
+        <ValidationMessage For="@(() => Model.Name)" />
+    </div>
+    <div class="mb-3">
+        <label for="text" class="form-label">Text</label>
+        <InputText id="text" class="form-control" @bind-Value="Model.Text" />
+        <ValidationMessage For="@(() => Model.Text)" />
+    </div>
+    <InputFile OnChange="HandleFileChange" />
+    <button type="submit" class="btn btn-primary">Create</button>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    RecipeUpsertDto Model { get; set; } = new();
+    string? error;
+
+    async Task HandleFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        // Read the file content into a byte array
+        using (var stream = new MemoryStream())
+        {
+            await file.OpenReadStream().CopyToAsync(stream);
+            Model.FileContent = stream.ToArray();
+        }
+
+        // Set the file name
+        Model.FileName = file.Name;
+    }
+
+    async Task HandleValidSubmit()
+    {
+        try
+        {
+            var response = await RecipeService.AddAsync(Model);
+            NavigationManager.NavigateTo("/recipes");
+        }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+        {
+            error = $"{ex.Message}";
+        }
+    }
+}
+*@
