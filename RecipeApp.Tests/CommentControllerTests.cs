@@ -1,12 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Moq;
-using RecipesApp.Controllers;
-using RecipesApp.Shared.DTOs.Comment;
-using RecipesApp.Shared.Helpers;
-using RecipesApp.Shared.Interfaces;
-using System.Net;
-
-namespace RecipeApp.Tests
+﻿namespace RecipeApp.Tests
 {
     public class CommentControllerTests
     {
@@ -20,7 +12,7 @@ namespace RecipeApp.Tests
                 {
                     Result = new List<CommentReadOnlyDto>
                     {
-                        new CommentReadOnlyDto
+                        new()
                         {
                             Id = 1,
                             Text = "Test Comment",
@@ -65,7 +57,7 @@ namespace RecipeApp.Tests
         }
 
         [Fact]
-        public async Task Put_Returns_NoContentResult()
+        public async Task Put_Returns_NoContentResult_When_Service_Returns_NoContent()
         {
             // Arrange
             var commentServiceMock = new Mock<ICommentService>();
@@ -82,7 +74,41 @@ namespace RecipeApp.Tests
         }
 
         [Fact]
-        public async Task Delete_Returns_NoContentResult()
+        public async Task Put_Returns_UnauthorizedResult_When_Service_Returns_Unauthorized()
+        {
+            // Arrange
+            var commentServiceMock = new Mock<ICommentService>();
+            commentServiceMock.Setup(x => x.UpdateComment(It.IsAny<int>(), It.IsAny<CommentUpsertDto>()))
+                .ReturnsAsync(new ServiceResult { StatusCode = HttpStatusCode.Unauthorized });
+
+            var controller = new CommentsController(commentServiceMock.Object);
+
+            // Act
+            var result = await controller.Put(1, new CommentUpsertDto { RecipeId = 1, Text = "Updated Comment" });
+
+            // Assert
+            Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task Put_Returns_NotFoundResult_When_Service_Returns_NotFound()
+        {
+            // Arrange
+            var commentServiceMock = new Mock<ICommentService>();
+            commentServiceMock.Setup(x => x.UpdateComment(It.IsAny<int>(), It.IsAny<CommentUpsertDto>()))
+                .ReturnsAsync(new ServiceResult { StatusCode = HttpStatusCode.NotFound });
+
+            var controller = new CommentsController(commentServiceMock.Object);
+
+            // Act
+            var result = await controller.Put(1, new CommentUpsertDto { RecipeId = 1, Text = "Updated Comment" });
+
+            // Assert
+            Assert.IsType<NotFoundObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task Delete_Returns_NoContentResult_When_Service_Returns_NoContent()
         {
             // Arrange
             var commentServiceMock = new Mock<ICommentService>();
@@ -96,6 +122,40 @@ namespace RecipeApp.Tests
 
             // Assert
             Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task Delete_Returns_UnauthorizedResult_When_Service_Returns_Unauthorized()
+        {
+            // Arrange
+            var commentServiceMock = new Mock<ICommentService>();
+            commentServiceMock.Setup(x => x.DeleteComment(It.IsAny<int>()))
+                .ReturnsAsync(new ServiceResult { StatusCode = HttpStatusCode.Unauthorized });
+
+            var controller = new CommentsController(commentServiceMock.Object);
+
+            // Act
+            var result = await controller.Delete(1);
+
+            // Assert
+            Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task Delete_Returns_NotFoundResult_When_Service_Returns_NotFound()
+        {
+            // Arrange
+            var commentServiceMock = new Mock<ICommentService>();
+            commentServiceMock.Setup(x => x.DeleteComment(It.IsAny<int>()))
+                .ReturnsAsync(new ServiceResult { StatusCode = HttpStatusCode.NotFound });
+
+            var controller = new CommentsController(commentServiceMock.Object);
+
+            // Act
+            var result = await controller.Delete(1);
+
+            // Assert
+            Assert.IsType<NotFoundObjectResult>(result);
         }
     }
 }

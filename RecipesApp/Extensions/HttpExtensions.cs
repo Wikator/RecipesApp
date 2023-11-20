@@ -5,9 +5,12 @@ namespace RecipesApp.Extensions
 {
     public static class HttpExtensions
     {
-        public static void AddPaginationHeader(this HttpResponse response,
+        public static void AddPaginationHeader(this HttpResponse? response,
             int currentPage, int itemsPerPage, int totalItems, int totalPages)
         {
+            if (response is null)
+                return;
+
             JsonSerializerOptions options = new()
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

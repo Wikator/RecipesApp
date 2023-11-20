@@ -1,14 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Moq;
-using RecipesApp.Controllers;
-using RecipesApp.Helpers;
-using RecipesApp.Shared.Helpers;
-using RecipesApp.Shared.Interfaces;
-using RecipesApp.Shared.DTOs.Recipe;
-using RecipesApp.Shared.DTOs.ApplicationUser;
-using System.Net;
-
-namespace RecipeApp.Tests
+﻿namespace RecipeApp.Tests
 {
     public class RecipesControllerTests
     {
@@ -44,38 +34,38 @@ namespace RecipeApp.Tests
             Assert.IsType<OkObjectResult>(result);
         }
 
-        //[Fact]
-        //public async Task Get_Returns_OkResult_With_PagedRecipes()
-        //{
-        //    // Arrange
-        //    var recipeServiceMock = new Mock<IRecipeService>();
-        //    recipeServiceMock.Setup(x => x.GetPagedItemsAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(
-        //        new ServiceResult<PagedList<RecipeReadOnlyDto>>
-        //        {
-        //            Result = new PagedList<RecipeReadOnlyDto>(new List<RecipeReadOnlyDto> 
-        //            { 
-        //                new() 
-        //                { 
-        //                    Id = 1,
-        //                    Name = "Test Recipe",
-        //                    Author = new ApplicationUserReadOnlyDto
-        //                    {
-        //                        UserName = "User 1"
-        //                    }
-        //                }
-        //            }, 1, 5, 1),
-        //            IsSuccessful = true,
-        //            StatusCode = HttpStatusCode.OK
-        //        });
+        [Fact]
+        public async Task Get_Returns_OkResult_With_PagedRecipes()
+        {
+            // Arrange
+            var recipeServiceMock = new Mock<IRecipeService>();
+            recipeServiceMock.Setup(x => x.GetPagedItemsAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>())).ReturnsAsync(
+                new ServiceResult<PagedList<RecipeReadOnlyDto>>
+                {
+                    Result = new PagedList<RecipeReadOnlyDto>(new List<RecipeReadOnlyDto>
+                    {
+                        new()
+                        {
+                            Id = 1,
+                            Name = "Test Recipe",
+                            Author = new ApplicationUserReadOnlyDto
+                            {
+                                UserName = "User 1"
+                            }
+                        }
+                    }, 1, 5, 1),
+                    IsSuccessful = true,
+                    StatusCode = HttpStatusCode.OK
+                });
 
-        //    var controller = new RecipesController(recipeServiceMock.Object);
+            var controller = new RecipesController(recipeServiceMock.Object);
 
-        //    // Act
-        //    var result = await controller.Get(new PaginationParams { PageNumber = 1, PageSize = 5 });
+            // Act
+            var result = await controller.Get(new PaginationParams { PageNumber = 1, PageSize = 5 });
 
-        //    // Assert
-        //    Assert.IsType<OkObjectResult>(result);
-        //}
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+        }
 
         [Fact]
         public async Task Get_ById_Returns_OkResult_With_Recipe()
@@ -229,6 +219,27 @@ namespace RecipeApp.Tests
         }
 
         [Fact]
+        public async Task Put_Returns_NotFoundResult_When_Service_Returns_NotFound()
+        {
+            // Arrange
+            var recipeServiceMock = new Mock<IRecipeService>();
+            recipeServiceMock.Setup(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<RecipeUpsertDto>())).ReturnsAsync(
+                new ServiceResult
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "Validation error"
+                });
+
+            var controller = new RecipesController(recipeServiceMock.Object);
+
+            // Act
+            var result = await controller.Put(1, new RecipeUpsertDto { Name = "Invalid Recipe" });
+
+            // Assert
+            Assert.IsType<NotFoundObjectResult>(result);
+        }
+
+        [Fact]
         public async Task Delete_Returns_BadRequestResult_When_Service_Returns_BadRequest()
         {
             // Arrange
@@ -247,6 +258,48 @@ namespace RecipeApp.Tests
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task Delete_Returns_UnauthorizedResult_When_Service_Returns_Unauthorized()
+        {
+            // Arrange
+            var recipeServiceMock = new Mock<IRecipeService>();
+            recipeServiceMock.Setup(x => x.DeleteAsync(It.IsAny<int>())).ReturnsAsync(
+                new ServiceResult
+                {
+                    StatusCode = HttpStatusCode.Unauthorized,
+                    Message = "Validation error"
+                });
+
+            var controller = new RecipesController(recipeServiceMock.Object);
+
+            // Act
+            var result = await controller.Delete(1);
+
+            // Assert
+            Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task Delete_Returns_NotFoundResult_When_Service_Returns_NotFoundResult()
+        {
+            // Arrange
+            var recipeServiceMock = new Mock<IRecipeService>();
+            recipeServiceMock.Setup(x => x.DeleteAsync(It.IsAny<int>())).ReturnsAsync(
+                new ServiceResult
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "Validation error"
+                });
+
+            var controller = new RecipesController(recipeServiceMock.Object);
+
+            // Act
+            var result = await controller.Delete(1);
+
+            // Assert
+            Assert.IsType<NotFoundObjectResult>(result);
         }
     }
 }

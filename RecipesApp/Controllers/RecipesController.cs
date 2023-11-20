@@ -21,9 +21,7 @@ namespace RecipesApp.Controllers
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Get([FromQuery] PaginationParams paginationParams)
-        {
-            await Task.Delay(500);
-            
+        {       
             if (paginationParams.PageNumber is null || paginationParams.PageSize is null)
             {
                 return Ok((await RecipeService.GetAllAsync()).Result!);
@@ -95,7 +93,7 @@ namespace RecipesApp.Controllers
             return result.StatusCode switch
             {
                 HttpStatusCode.NoContent => NoContent(),
-                HttpStatusCode.Unauthorized => BadRequest(result.Message),
+                HttpStatusCode.Unauthorized => Unauthorized(result.Message),
                 HttpStatusCode.NotFound => NotFound(result.Message),
                 HttpStatusCode.BadRequest => BadRequest(result.Message),
                 _ => throw new Exception()
