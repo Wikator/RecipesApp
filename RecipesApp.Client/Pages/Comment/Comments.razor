@@ -18,8 +18,8 @@
 
     @if (model is not null)
     {
-        <AuthorizeView>
-            <Authorized Context="authContext">
+        <AuthorizeView Context="authContext">
+            <Authorized>
                 <button class="btn btn-danger mb-3" @onclick="(_ => model = null)">Discard comment</button>
                 <EditForm Model="model" OnValidSubmit="HandleSubmit">
                     <DataAnnotationsValidator />
@@ -33,7 +33,6 @@
                 <RedirectToLogin />
             </NotAuthorized>
         </AuthorizeView>
-        
     }
     else
     {

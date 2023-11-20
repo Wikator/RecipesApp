@@ -1,6 +1,7 @@
 ﻿using RecipesApp.Shared.DTOs.Comment;
 using RecipesApp.Shared.Helpers;
 using RecipesApp.Shared.Interfaces;
+using System.Net;
 using System.Net.Http.Json;
 
 namespace RecipesApp.Client.Services
@@ -17,6 +18,8 @@ namespace RecipesApp.Client.Services
             if (!response.IsSuccessStatusCode)
                 return ServiceResult<CommentReadOnlyDto>.GenerateFailedResult(
                     await response.Content.ReadAsStringAsync(), response.StatusCode);
+
+            Console.WriteLine(response.StatusCode);
 
             var comment = await response.Content.ReadFromJsonAsync<CommentReadOnlyDto>()
                 ?? throw new Exception();

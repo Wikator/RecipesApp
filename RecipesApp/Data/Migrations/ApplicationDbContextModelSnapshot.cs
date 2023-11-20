@@ -244,7 +244,7 @@ namespace RecipesApp.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
 
                     b.HasData(
                         new
@@ -3773,7 +3773,7 @@ namespace RecipesApp.Migrations
                     b.HasIndex("RecipeId")
                         .IsUnique();
 
-                    b.ToTable("Pictures");
+                    b.ToTable("Pictures", (string)null);
 
                     b.HasData(
                         new
@@ -7304,7 +7304,7 @@ namespace RecipesApp.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.ToTable("Recipes");
+                    b.ToTable("Recipes", (string)null);
 
                     b.HasData(
                         new

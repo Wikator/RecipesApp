@@ -9,6 +9,9 @@ using RecipesApp.Shared.DTOs.Recipe;
 using System.Net;
 using RecipesApp.Shared.Helpers;
 using RecipesApp.Shared.Interfaces;
+using System.Reflection;
+using System.Text;
+using System.Linq.Dynamic.Core;
 
 namespace RecipesApp.Services
 {
@@ -100,10 +103,13 @@ namespace RecipesApp.Services
             return ServiceResult<RecipeReadOnlyDetailsDto>.GenerateSuccessfulResult(recipe, HttpStatusCode.OK);
         }
 
-        public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage)
+        public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage, string? orderQuerry)
         {
-            var query = Db.Recipes.ProjectTo<RecipeReadOnlyDto>(Mapper.ConfigurationProvider);
-            var pagedList = await CreatePagedListFromQuery(query, pageNumber, itemsPerPage);
+            var pagedList = await Db.Recipes
+                .ApplySort(orderQuerry)
+                .ProjectTo<RecipeReadOnlyDto>(Mapper.ConfigurationProvider)
+                .CreatePagedList(pageNumber, itemsPerPage);
+
             return ServiceResult<PagedList<RecipeReadOnlyDto>>.GenerateSuccessfulResult(pagedList, HttpStatusCode.OK);
         }
 
@@ -145,14 +151,6 @@ namespace RecipesApp.Services
             Db.Recipes.Update(recipe);
             await Db.SaveChangesAsync();
             return ServiceResult.GenerateSuccessfulResult(HttpStatusCode.NoContent);
-        }
-
-
-        private static async Task<PagedList<TDto>> CreatePagedListFromQuery<TDto>(IQueryable<TDto> query, int pageNumber, int pageSize)
-        {
-            int count = await query.CountAsync();
-            IEnumerable<TDto> items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-            return new PagedList<TDto>(items, pageNumber, pageSize, count);
         }
     }
 }

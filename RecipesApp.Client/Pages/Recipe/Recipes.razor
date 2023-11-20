@@ -23,7 +23,7 @@
             <img src="@(context.ImageUrl)" alt="@context.Name" width="200" height="150" />
         </div>     
     </TemplateColumn>
-    <PropertyColumn Property="@(r => r.Name)" />
+    <PropertyColumn Property="@(r => r.Name)" Sortable="true" />
     <PropertyColumn Title="Author" Property="@(r => r.Author.UserName)" />
     <TemplateColumn Title="Action">
         <button class="btn btn-info" @onclick="@(_ => NavigationManager.NavigateTo($"recipes/details/{context.Id}"))">Show</button>
@@ -43,7 +43,15 @@
         {
             try
             {
-                var response = await RecipeService.GetPagedItemsAsync(req.StartIndex / req.Count + 1 ?? 1, req.Count ?? int.MaxValue);
+                var stringQuerry = req.GetSortByProperties().Aggregate(new StringBuilder(), (sb, curr) =>
+                    sb.Append(curr.PropertyName + (curr.Direction == SortDirection.Descending ? " desc" : string.Empty) + ',')
+                );         
+
+                var response = await RecipeService.GetPagedItemsAsync(
+                    req.StartIndex / req.Count + 1 ?? 1, 
+                    req.Count ?? int.MaxValue,
+                    stringQuerry.ToString()
+                    );
                 
                 if (response.Result is null)
                     return GridItemsProviderResult.From(Array.Empty<RecipeReadOnlyDto>(), 0);

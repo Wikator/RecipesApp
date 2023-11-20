@@ -23,8 +23,9 @@ namespace RecipesApp.Shared.Interfaces
         /// </summary>
         /// <param name="pageNumber">Number of a page</param>
         /// <param name="itemsPerPage">How many recipes should there be on one page</param>
+        /// <param name="orderQuerry">Ordering separeted by commas, for example: name,likes desc</param>
         /// <returns>200 (with paginated recipes)</returns>
-        Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage);
+        Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage, string? orderQuerry);
 
         /// <summary>
         /// Adds a new recipe to database

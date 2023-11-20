@@ -30,7 +30,7 @@ namespace RecipesApp.Controllers
             }
 
             var recipes = (await RecipeService
-                .GetPagedItemsAsync(paginationParams.PageNumber.Value, paginationParams.PageSize.Value)).Result
+                .GetPagedItemsAsync(paginationParams.PageNumber.Value, paginationParams.PageSize.Value, paginationParams.OrderBy)).Result
                 ?? throw new Exception("Recipes not present, despite operation completing successfully");
 
             Response.AddPaginationHeader(recipes.PageNumber, recipes.PageSize, recipes.TotalCount, recipes.TotalPages);
