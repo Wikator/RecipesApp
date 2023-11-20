@@ -26,6 +26,7 @@
                     <div class="mb-3">
                         <InputTextArea id="name" class="form-control" @bind-Value="model.Text" />
                     </div>
+                    <p class="text-danger">@error</p>
                     <button class="btn btn-info mb-3" type="submit">Add!</button>
                 </EditForm>
             </Authorized>
@@ -37,9 +38,7 @@
     else
     {
         <button class="btn btn-info mb-3" @onclick="(_ => model = new CommentUpsertDto() { RecipeId = RecipeId.Value })">Add comment</button>
-    }
-
-    
+    } 
 }
 
 
@@ -47,21 +46,23 @@
     [Parameter, EditorRequired] public int? RecipeId { get; init; }
     [Parameter, EditorRequired] public List<CommentReadOnlyDto>? CommentList { get; init; }
     private CommentUpsertDto? model;
+    private string? error;
 
     async Task HandleSubmit()
     {
         if (model is null || CommentList is null)
             return;
 
-        Console.WriteLine(model.RecipeId);
-        Console.WriteLine(model.Text);
+        var response = await CommentService.AddComment(model);
 
-        var result = await CommentService.AddComment(model);
-
-        if (result.Result is not null)
+        if (response.Result is not null)
         {
-            CommentList.Add(result.Result);
+            CommentList.Add(response.Result);
             model = null;
+        }
+        else
+        {
+            error = response.Message;
         }
     }
 }
