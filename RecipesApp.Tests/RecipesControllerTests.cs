@@ -7,7 +7,7 @@
         {
             // Arrange
             var recipeServiceMock = new Mock<IRecipeService>();
-            recipeServiceMock.Setup(x => x.GetAllAsync()).ReturnsAsync(new ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>
+            recipeServiceMock.Setup(x => x.GetAllAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>
             {
                 Result = new List<RecipeReadOnlyDetailsDto> 
                 { 
@@ -39,7 +39,7 @@
         {
             // Arrange
             var recipeServiceMock = new Mock<IRecipeService>();
-            recipeServiceMock.Setup(x => x.GetPagedItemsAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>())).ReturnsAsync(
+            recipeServiceMock.Setup(x => x.GetPagedItemsAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(
                 new ServiceResult<PagedList<RecipeReadOnlyDto>>
                 {
                     Result = new PagedList<RecipeReadOnlyDto>(new List<RecipeReadOnlyDto>

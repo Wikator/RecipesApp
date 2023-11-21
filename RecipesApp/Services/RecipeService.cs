@@ -90,10 +90,18 @@ namespace RecipesApp.Services
             return ServiceResult.GenerateSuccessfulResult(HttpStatusCode.NoContent);
         }
 
-        public async Task<ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>> GetAllAsync()
+        public async Task<ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>> GetAllAsync(string? orderQuerry,
+            string? filter)
         {
-            var recipes = await Db.Recipes
+            var query = filter switch
+            {
+                null => Db.Recipes,
+                _ => Db.Recipes.Where(r => r.Name.Contains(filter))
+            };
+
+            var recipes = await query
                 .ProjectTo<RecipeReadOnlyDetailsDto>(Mapper.ConfigurationProvider)
+                .ApplySort(orderQuerry)
                 .ToListAsync();
 
             return ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>
@@ -135,6 +143,7 @@ namespace RecipesApp.Services
         {
             var recipe = await Db.Recipes
                 .Include(r => r.Picture)
+                .Include(r => r.Ingredients)
                 .Where(r => r.Id == id)
                 .SingleOrDefaultAsync();
 
@@ -157,6 +166,17 @@ namespace RecipesApp.Services
                         .GenerateFailedResult("Image to replace image. Try again later", HttpStatusCode.BadRequest);
 
                 recipe.Picture = null;
+            }
+
+            if (recipe.Ingredients is not null)
+            {
+                foreach (var ingredient in recipe.Ingredients)
+                {
+                    if (!item.Ingredients.Select(i => i.Id).Contains(ingredient.Id))
+                    {
+                        Db.Remove(ingredient);
+                    }
+                }
             }
 
             Mapper.Map(item, recipe);

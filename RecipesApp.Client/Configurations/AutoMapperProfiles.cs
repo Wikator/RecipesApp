@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using RecipesApp.Shared.DTOs.Ingredient;
 using RecipesApp.Shared.DTOs.Recipe;
 
 namespace RecipesApp.Client.Configurations
@@ -9,6 +10,8 @@ namespace RecipesApp.Client.Configurations
         {
             CreateMap<RecipeReadOnlyDetailsDto, RecipeUpdateDto>().ForMember(dest => dest.UseOldPicture,
                 opt => opt.MapFrom(src => src.ImageUrl != null));
+
+            CreateMap<IngredientReadOnlyDto, IngredientUpsertDto>();
         }
     }
 }

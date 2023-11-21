@@ -1,0 +1,10 @@
+﻿.comments-container {
+    margin-top: 30px;
+}
+
+.comment {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+}

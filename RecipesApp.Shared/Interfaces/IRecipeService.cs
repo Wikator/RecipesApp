@@ -8,8 +8,11 @@ namespace RecipesApp.Shared.Interfaces
         /// <summary>
         /// Gets all existing recipes
         /// </summary>
+        /// <param name="orderQuerry">Ordering separeted by commas, for example: name,likes desc</param>
+        /// <param name="filter">Filtering by name</param>
         /// <returns>200 (with all recipes)</returns>
-        Task<ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>> GetAllAsync();
+        Task<ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>> GetAllAsync(string? orderQuerry,
+            string? filter);
 
         /// <summary>
         /// Gets a recipe by id
@@ -24,9 +27,10 @@ namespace RecipesApp.Shared.Interfaces
         /// <param name="pageNumber">Number of a page</param>
         /// <param name="itemsPerPage">How many recipes should there be on one page</param>
         /// <param name="orderQuerry">Ordering separeted by commas, for example: name,likes desc</param>
+        /// <param name="filter">Filtering by name</param>
         /// <returns>200 (with paginated recipes)</returns>
-        Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage, string? orderQuerry,
-            string? filter);
+        Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage,
+            string? orderQuerry, string? filter);
 
         /// <summary>
         /// Adds a new recipe to database

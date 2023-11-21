@@ -9,14 +9,7 @@
 
 @if(model is null)
 {
-    if (fetchError is null)
-    {
-        <div class="alert alert info">Loading...</div>
-    }
-    else
-    {
-        <div class="alert alert-danger">@fetchError</div>
-    }
+    <div class="alert alert info">Loading...</div>
 }
 else
 {
@@ -25,15 +18,53 @@ else
     <ErrorMessage Message="@updateError" />
 
     <EditForm Model="model" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
         <div class="mb-3">
             <label for="name" class="form-label">Name</label>
             <InputText id="name" class="form-control" @bind-Value="model.Name" />
+            <ValidationMessage For="@(() => model.Name)" />
         </div>
         <div class="mb-3">
             <label for="text" class="form-label">Text</label>
             <InputText id="text" class="form-control" @bind-Value="model.Text" />
+            <ValidationMessage For="@(() => model.Text)" />
         </div>
 
+        <hr />
+
+        @foreach (var ingredient in model.Ingredients)
+        {
+            var guid = Guid.NewGuid().ToString();
+
+            <div class="mb-3">
+                <label for="@("ingredient-name-" + guid)" class="form-label">Text</label>
+                <InputText id="@("ingredient-name-" + guid)" class="form-control" @bind-Value="ingredient.Name" />
+                <ValidationMessage For="@(() => ingredient.Name)" />
+            </div>
+
+            guid = Guid.NewGuid().ToString();
+
+            <div class="mb-3">
+                <label for="@("ingredient-amount-" + guid)" class="form-label">Amount</label>
+                <InputText id="@("ingredient-amount-" + guid)" class="form-control" @bind-Value="ingredient.Amount" />
+                <ValidationMessage For="@(() => ingredient.Amount)" />
+            </div>
+
+            guid = Guid.NewGuid().ToString();
+
+            <div class="mb-3">
+                <label for="@("ingredient-notes-" + guid)" class="form-label">Notes</label>
+                <InputText id="@("ingredient-notes-" + guid)" class="form-control" @bind-Value="ingredient.Notes" />
+                <ValidationMessage For="@(() => ingredient.Notes)" />
+            </div>
+
+            <button type="button" class="btn btn-danger" @onclick="@(_ => RemoveIngredient(ingredient))">Remove this ingredient</button>
+            <hr />
+        }
+
+        <button type="button" class="btn btn-info" @onclick="AddIngredient">Add ingredient</button>
+
+        <hr />
         
         <div class="mb-3">
             @if (model.UseOldPicture)
@@ -78,7 +109,6 @@ else
     private string? OldPictureUrl;
     string? updateError;
     string? deleteError;
-    string? fetchError;
     string fileInputKey = Guid.NewGuid().ToString();
     bool isSubmitting;
 
@@ -118,6 +148,22 @@ else
 
         // Set the file name
         model.FileName = file.Name;
+    }
+
+    void AddIngredient()
+    {
+        var ingredient = new IngredientUpsertDto()
+            {
+                Amount = "0",
+                Name = "New Ingredient"
+            };
+
+        model?.Ingredients.Add(ingredient);
+    }
+
+    void RemoveIngredient(IngredientUpsertDto ingredient)
+    {
+        model?.Ingredients.Remove(ingredient);
     }
 
     void RemovePicture()
@@ -163,7 +209,7 @@ else
         else
         {
             isSubmitting = false;
-            updateError = response.Message;
+            deleteError = response.Message;
         }
     }
 }

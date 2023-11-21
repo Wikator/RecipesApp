@@ -3,6 +3,7 @@ using RecipesApp.Data;
 using RecipesApp.Entities;
 using RecipesApp.Shared.DTOs.ApplicationUser;
 using RecipesApp.Shared.DTOs.Comment;
+using RecipesApp.Shared.DTOs.Ingredient;
 using RecipesApp.Shared.DTOs.Recipe;
 
 namespace RecipesApp.Configurations
@@ -23,6 +24,8 @@ namespace RecipesApp.Configurations
             CreateMap<CommentUpsertDto, Comment>();
             CreateMap<RecipeCreateDto, Recipe>();
             CreateMap<RecipeUpdateDto, Recipe>();
+            CreateMap<Ingredient, IngredientReadOnlyDto>();
+            CreateMap<IngredientUpsertDto,  Ingredient>();
             CreateMap<ApplicationUser, ApplicationUserReadOnlyDto>();
         }
     }

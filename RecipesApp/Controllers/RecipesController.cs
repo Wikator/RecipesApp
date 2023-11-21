@@ -24,7 +24,10 @@ namespace RecipesApp.Controllers
         {       
             if (paginationParams.PageNumber is null || paginationParams.PageSize is null)
             {
-                return Ok((await RecipeService.GetAllAsync()).Result!);
+                var recipe = (await RecipeService.GetAllAsync(paginationParams.OrderBy, paginationParams.Filter)).Result
+                    ?? throw new Exception("Recipes not present, despite operation completing successfully");
+
+                return Ok(recipe);
             }
 
             var recipes = (await RecipeService

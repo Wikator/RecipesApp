@@ -1,5 +1,6 @@
 ﻿using RecipesApp.Shared.DTOs.ApplicationUser;
 using RecipesApp.Shared.DTOs.Comment;
+using RecipesApp.Shared.DTOs.Ingredient;
 
 namespace RecipesApp.Shared.DTOs.Recipe
 {
@@ -11,5 +12,6 @@ namespace RecipesApp.Shared.DTOs.Recipe
         public string? ImageUrl { get; init; }
         public required ApplicationUserReadOnlyDto Author { get; init; }
         public List<CommentReadOnlyDto> Comments { get; init; } = [];
+        public List<IngredientReadOnlyDto> Ingredients { get; init; } = [];
     }
 }

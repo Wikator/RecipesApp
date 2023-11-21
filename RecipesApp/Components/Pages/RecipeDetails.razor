@@ -11,24 +11,38 @@
 }
 else
 {
-    <div class="card mb-4">
-        <div class="card-img-top">
-            <img src="@recipe.ImageUrl" alt="recipe-image" width="500" height="300" />
-        </div>
-        <div class="card-title">
-            @recipe.Name
-        </div>
-        <div class="card-body">
-            @recipe.Text
-        </div>
-        <div class="card-footer">
-            <NavLink href=@($"recipes/update/{recipe.Id}") class="btn btn-warning">Update</NavLink>
+    <NavLink href=@($"recipes/update/{recipe.Id}") class="btn btn-warning">Update</NavLink>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2 recipe-container">
+                <!-- Recipe Image -->
+                <img src="@recipe.ImageUrl" class="img-fluid rounded recipe-image" alt="Recipe Image">
+
+                <!-- Recipe Title -->
+                <h1 class="mt-3">@recipe.Name</h1>
+
+                <!-- Recipe Ingredients -->
+                <h3 class="mt-4">Ingredients:</h3>
+                <ul class="ingredients-list">
+                    @foreach(var ingredient in recipe.Ingredients)
+                    {
+                        <li>@ingredient.Name</li>
+                    }
+                    <!-- Add more ingredients as needed -->
+                </ul>
+
+                <!-- Recipe Text -->
+                <h3 class="mt-4">Instructions:</h3>
+                <p class="instructions">@recipe.Text</p>
+                <!-- Add more text as needed -->
+
+                <Comments CommentList="recipe.Comments" RecipeId="recipe.Id" />
+
+                <NavLink href="recipes" class="btn btn-secondary">Back to list</NavLink>
+
+            </div>
         </div>
     </div>
-
-    <Comments CommentList="recipe.Comments" RecipeId="recipe.Id" />
-
-    <NavLink href="recipes" class="btn btn-dark mb-3">Back to list</NavLink>
 }
 
 @code {

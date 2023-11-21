@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using RecipesApp.Shared.DTOs.Ingredient;
+using System.ComponentModel.DataAnnotations;
 
 namespace RecipesApp.Shared.DTOs.Recipe
 {
@@ -9,5 +10,6 @@ namespace RecipesApp.Shared.DTOs.Recipe
         public string? Text { get; set; }
         public string? FileName { get; set; }
         public byte[]? FileContent { get; set; }
+        public List<IngredientUpsertDto> Ingredients { get; init; } = [];
     }
 }

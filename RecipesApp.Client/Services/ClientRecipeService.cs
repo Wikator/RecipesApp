@@ -17,8 +17,10 @@ namespace RecipesApp.Client.Services
 
             if (response.IsSuccessStatusCode)
             {
-                var recipe = await response.Content.ReadFromJsonAsync<RecipeReadOnlyDetailsDto>();
-                return ServiceResult<RecipeReadOnlyDetailsDto>.GenerateSuccessfulResult(recipe!, response.StatusCode);
+                var recipe = await response.Content.ReadFromJsonAsync<RecipeReadOnlyDetailsDto>()
+                    ?? throw new Exception("API didn't return new object, despite sucessfully creating it");
+
+                return ServiceResult<RecipeReadOnlyDetailsDto>.GenerateSuccessfulResult(recipe, response.StatusCode);
             }
 
             var message = await response.Content.ReadAsStringAsync();
@@ -37,9 +39,11 @@ namespace RecipesApp.Client.Services
             return ServiceResult.GenerateFailedResult(message, response.StatusCode);
         }
 
-        public async Task<ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>> GetAllAsync()
+        public async Task<ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>> GetAllAsync(string? orderQuerry,
+            string? filter)
         {
-            var recipes = await Http.GetFromJsonAsync<IEnumerable<RecipeReadOnlyDetailsDto>>(BaseUrl)
+            var url = $"{BaseUrl}?orderBy={orderQuerry}&filter={filter}";
+            var recipes = await Http.GetFromJsonAsync<IEnumerable<RecipeReadOnlyDetailsDto>>(url)
                 ?? Enumerable.Empty<RecipeReadOnlyDetailsDto>();
 
             return ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>.GenerateSuccessfulResult(recipes, System.Net.HttpStatusCode.OK);
@@ -64,7 +68,8 @@ namespace RecipesApp.Client.Services
         public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage,
             string? orderQuerry, string? filter)
         {
-            var response = await Http.GetAsync($"{BaseUrl}?pageNumber={pageNumber}&pageSize={itemsPerPage}&orderBy={orderQuerry}&filter={filter}");
+            var url = $"{BaseUrl}?pageNumber={pageNumber}&pageSize={itemsPerPage}&orderBy={orderQuerry}&filter={filter}";
+            var response = await Http.GetAsync(url);
             
             var recipes = await response.Content.ReadFromJsonAsync<IEnumerable<RecipeReadOnlyDto>>()
                 ?? throw new Exception();
