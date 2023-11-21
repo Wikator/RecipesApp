@@ -61,12 +61,13 @@ namespace RecipesApp.Client.Services
             return ServiceResult<RecipeReadOnlyDetailsDto>.GenerateFailedResult(message, response.StatusCode);
         }
 
-        public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage, string? orderQuerry)
+        public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage,
+            string? orderQuerry, string? filter)
         {
-            var response = await Http.GetAsync($"{BaseUrl}?pageNumber={pageNumber}&pageSize={itemsPerPage}&orderBy={orderQuerry}");
+            var response = await Http.GetAsync($"{BaseUrl}?pageNumber={pageNumber}&pageSize={itemsPerPage}&orderBy={orderQuerry}&filter={filter}");
             
             var recipes = await response.Content.ReadFromJsonAsync<IEnumerable<RecipeReadOnlyDto>>()
-            ?? throw new Exception();
+                ?? throw new Exception();
 
             var paginationHeader = response.Headers.GetValues("Pagination").FirstOrDefault()
                 ?? throw new Exception();

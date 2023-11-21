@@ -34,12 +34,22 @@ namespace RecipesApp.Services
 
             if (item.FileContent is not null)
             {
-                var file = new FormFile(new MemoryStream(item.FileContent), 0, item.FileContent.Length, "file", item.FileName ?? $"recipe {recipe.AuthorId}");
+                var file = new FormFile(
+                    new MemoryStream(item.FileContent),
+                    0,
+                    item.FileContent.Length,
+                    "file", item.FileName ?? $"recipe-{recipe.AuthorId}");
+
                 var uploadResult = await PhotoService.AddPhotoAsync(file);
                 if (uploadResult.Error is not null)
-                    return ServiceResult<RecipeReadOnlyDetailsDto>.GenerateFailedResult("Image Failed to save", HttpStatusCode.BadRequest);
+                    return ServiceResult<RecipeReadOnlyDetailsDto>
+                        .GenerateFailedResult("Image Failed to save", HttpStatusCode.BadRequest);
 
-                recipe.Picture = new() { Url = uploadResult.SecureUrl.AbsoluteUri, PublicId = uploadResult.PublicId };
+                recipe.Picture = new() 
+                { 
+                    Url = uploadResult.SecureUrl.AbsoluteUri,
+                    PublicId = uploadResult.PublicId
+                };
             }
 
             Db.Recipes.Add(recipe);
@@ -57,19 +67,22 @@ namespace RecipesApp.Services
                 .SingleOrDefaultAsync();
 
             if (recipe is null)
-                return ServiceResult.GenerateFailedResult("Recipe does not exist", HttpStatusCode.NotFound);
+                return ServiceResult.GenerateFailedResult("Recipe does not exist",
+                    HttpStatusCode.NotFound);
 
             var userId = HttpContext.HttpContext?.User.GetLoggedInUserId();
 
             if (recipe.AuthorId != userId)
-                return ServiceResult.GenerateFailedResult("You can't delete other users' recipes", HttpStatusCode.Unauthorized);
+                return ServiceResult.GenerateFailedResult("You can't delete other users' recipes",
+                    HttpStatusCode.Unauthorized);
 
             if (recipe.Picture is not null)
             {
                 var deleteResult = await PhotoService.DeletePhotoAsync(recipe.Picture.PublicId);
 
                 if (deleteResult.Error is not null)
-                    return ServiceResult.GenerateFailedResult("Image Failed to delete", HttpStatusCode.BadRequest);
+                    return ServiceResult.GenerateFailedResult("Image Failed to delete",
+                        HttpStatusCode.BadRequest);
             }
 
             Db.Recipes.Remove(recipe);
@@ -83,8 +96,8 @@ namespace RecipesApp.Services
                 .ProjectTo<RecipeReadOnlyDetailsDto>(Mapper.ConfigurationProvider)
                 .ToListAsync();
 
-            return ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>.GenerateSuccessfulResult(
-                recipes, HttpStatusCode.OK);
+            return ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>
+                .GenerateSuccessfulResult(recipes, HttpStatusCode.OK);
         }
 
         public async Task<ServiceResult<RecipeReadOnlyDetailsDto>> GetByIdAsync(int id)
@@ -101,9 +114,16 @@ namespace RecipesApp.Services
             return ServiceResult<RecipeReadOnlyDetailsDto>.GenerateSuccessfulResult(recipe, HttpStatusCode.OK);
         }
 
-        public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage, string? orderQuerry)
+        public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage,
+            string? orderQuerry, string? filter)
         {
-            var pagedList = await Db.Recipes
+            var query = filter switch
+            {
+                null => Db.Recipes,
+                _ => Db.Recipes.Where(r => r.Name.Contains(filter))
+            };
+
+            var pagedList = await query
                 .ApplySort(orderQuerry)
                 .ProjectTo<RecipeReadOnlyDto>(Mapper.ConfigurationProvider)
                 .CreatePagedList(pageNumber, itemsPerPage);
@@ -119,19 +139,22 @@ namespace RecipesApp.Services
                 .SingleOrDefaultAsync();
 
             if (recipe is null)
-                return ServiceResult.GenerateFailedResult("Recipe does not exist", HttpStatusCode.NotFound);
+                return ServiceResult
+                    .GenerateFailedResult("Recipe does not exist", HttpStatusCode.NotFound);
 
             var userId = HttpContext.HttpContext?.User.GetLoggedInUserId();
 
             if (recipe.AuthorId != userId)
-                return ServiceResult.GenerateFailedResult("You can't edit other users' recipes", HttpStatusCode.Unauthorized);
+                return ServiceResult
+                    .GenerateFailedResult("You can't edit other users' recipes", HttpStatusCode.Unauthorized);
 
             if (recipe.Picture is not null && !item.UseOldPicture)
             {
                 var deleteResult = await PhotoService.DeletePhotoAsync(recipe.Picture.PublicId);
 
                 if (deleteResult.Error is not null)
-                    return ServiceResult.GenerateFailedResult("Image to replace image. Try again later", HttpStatusCode.BadRequest);
+                    return ServiceResult
+                        .GenerateFailedResult("Image to replace image. Try again later", HttpStatusCode.BadRequest);
 
                 recipe.Picture = null;
             }
@@ -140,12 +163,22 @@ namespace RecipesApp.Services
 
             if (item.FileContent is not null && !item.UseOldPicture)
             {
-                var file = new FormFile(new MemoryStream(item.FileContent), 0, item.FileContent.Length, "file", item.FileName ?? $"recipe {id}");
+                var file = new FormFile(
+                    new MemoryStream(item.FileContent),
+                    0,
+                    item.FileContent.Length,
+                    "file", item.FileName ?? $"recipe {id}");
+
                 var uploadResult = await PhotoService.AddPhotoAsync(file);
                 if (uploadResult.Error is not null)
-                    return ServiceResult.GenerateFailedResult("Image Failed to save", HttpStatusCode.BadRequest);
+                    return ServiceResult
+                        .GenerateFailedResult("Image Failed to save", HttpStatusCode.BadRequest);
 
-                recipe.Picture = new() { Url = uploadResult.SecureUrl.AbsoluteUri, PublicId = uploadResult.PublicId };
+                recipe.Picture = new() 
+                {
+                    Url = uploadResult.SecureUrl.AbsoluteUri,
+                    PublicId = uploadResult.PublicId
+                };
             }
 
             Db.Recipes.Update(recipe);
