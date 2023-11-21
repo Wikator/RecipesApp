@@ -1,4 +1,4 @@
-﻿namespace RecipeApp.Tests
+﻿namespace RecipesApp.Tests
 {
     public class RecipesControllerTests
     {
@@ -118,7 +118,7 @@
         {
             // Arrange
             var recipeServiceMock = new Mock<IRecipeService>();
-            recipeServiceMock.Setup(x => x.AddAsync(It.IsAny<RecipeUpsertDto>())).ReturnsAsync(
+            recipeServiceMock.Setup(x => x.AddAsync(It.IsAny<RecipeCreateDto>())).ReturnsAsync(
                 new ServiceResult<RecipeReadOnlyDetailsDto>
                 {
                     StatusCode = HttpStatusCode.Created,
@@ -136,7 +136,7 @@
             var controller = new RecipesController(recipeServiceMock.Object);
 
             // Act
-            var result = await controller.Post(new RecipeUpsertDto { Name = "Test Recipe" });
+            var result = await controller.Post(new RecipeCreateDto { Name = "Test Recipe" });
 
             // Assert
             Assert.IsType<CreatedAtActionResult>(result);
@@ -147,13 +147,13 @@
         {
             // Arrange
             var recipeServiceMock = new Mock<IRecipeService>();
-            recipeServiceMock.Setup(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<RecipeUpsertDto>())).ReturnsAsync(
+            recipeServiceMock.Setup(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<RecipeUpdateDto>())).ReturnsAsync(
                 new ServiceResult { StatusCode = HttpStatusCode.NoContent });
 
             var controller = new RecipesController(recipeServiceMock.Object);
 
             // Act
-            var result = await controller.Put(1, new RecipeUpsertDto { Name = "Updated Recipe" });
+            var result = await controller.Put(1, new RecipeUpdateDto { Name = "Updated Recipe" });
 
             // Assert
             Assert.IsType<NoContentResult>(result);
@@ -181,7 +181,7 @@
         {
             // Arrange
             var recipeServiceMock = new Mock<IRecipeService>();
-            recipeServiceMock.Setup(x => x.AddAsync(It.IsAny<RecipeUpsertDto>())).ReturnsAsync(
+            recipeServiceMock.Setup(x => x.AddAsync(It.IsAny<RecipeCreateDto>())).ReturnsAsync(
                 new ServiceResult<RecipeReadOnlyDetailsDto>
                 {
                     StatusCode = HttpStatusCode.BadRequest,
@@ -191,7 +191,7 @@
             var controller = new RecipesController(recipeServiceMock.Object);
 
             // Act
-            var result = await controller.Post(new RecipeUpsertDto { Name = "Invalid Recipe" });
+            var result = await controller.Post(new RecipeCreateDto { Name = "Invalid Recipe" });
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
@@ -202,7 +202,7 @@
         {
             // Arrange
             var recipeServiceMock = new Mock<IRecipeService>();
-            recipeServiceMock.Setup(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<RecipeUpsertDto>())).ReturnsAsync(
+            recipeServiceMock.Setup(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<RecipeUpdateDto>())).ReturnsAsync(
                 new ServiceResult
                 {
                     StatusCode = HttpStatusCode.Unauthorized,
@@ -212,7 +212,7 @@
             var controller = new RecipesController(recipeServiceMock.Object);
 
             // Act
-            var result = await controller.Put(1, new RecipeUpsertDto { Name = "Invalid Recipe" });
+            var result = await controller.Put(1, new RecipeUpdateDto { Name = "Invalid Recipe" });
 
             // Assert
             Assert.IsType<UnauthorizedObjectResult>(result);
@@ -223,7 +223,7 @@
         {
             // Arrange
             var recipeServiceMock = new Mock<IRecipeService>();
-            recipeServiceMock.Setup(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<RecipeUpsertDto>())).ReturnsAsync(
+            recipeServiceMock.Setup(x => x.UpdateAsync(It.IsAny<int>(), It.IsAny<RecipeUpdateDto>())).ReturnsAsync(
                 new ServiceResult
                 {
                     StatusCode = HttpStatusCode.NotFound,
@@ -233,7 +233,7 @@
             var controller = new RecipesController(recipeServiceMock.Object);
 
             // Act
-            var result = await controller.Put(1, new RecipeUpsertDto { Name = "Invalid Recipe" });
+            var result = await controller.Put(1, new RecipeUpdateDto { Name = "Invalid Recipe" });
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);

@@ -21,7 +21,8 @@ namespace RecipesApp.Configurations
                 conf => conf.MapFrom(dest => dest.Author == null ? null : dest.Author.UserName));
 
             CreateMap<CommentUpsertDto, Comment>();
-            CreateMap<RecipeUpsertDto, Recipe>();
+            CreateMap<RecipeCreateDto, Recipe>();
+            CreateMap<RecipeUpdateDto, Recipe>();
             CreateMap<ApplicationUser, ApplicationUserReadOnlyDto>();
         }
     }

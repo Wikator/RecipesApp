@@ -2,6 +2,7 @@
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
 @using RecipesApp.Data
 
 @inject UserManager<ApplicationUser> UserManager
@@ -9,6 +10,7 @@
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<DeletePersonalData> Logger
+@inject ApplicationDbContext Context
 
 <PageTitle>Delete Personal Data</PageTitle>
 
@@ -62,6 +64,13 @@
         {
             message = "Error: Incorrect password.";
             return;
+        }
+
+        foreach (var comment in await Context.Comments.Where(c => c.AuthorId == user.Id).ToListAsync())
+        {
+            comment.AuthorId = null;
+            Context.Comments.Update(comment);
+            await Context.SaveChangesAsync();
         }
 
         var result = await UserManager.DeleteAsync(user);

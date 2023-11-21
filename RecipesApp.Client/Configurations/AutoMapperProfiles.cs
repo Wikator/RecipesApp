@@ -7,7 +7,8 @@ namespace RecipesApp.Client.Configurations
     {
         public AutoMapperProfiles()
         {
-            CreateMap<RecipeReadOnlyDetailsDto, RecipeUpsertDto>();
+            CreateMap<RecipeReadOnlyDetailsDto, RecipeUpdateDto>().ForMember(dest => dest.UseOldPicture,
+                opt => opt.MapFrom(src => src.ImageUrl != null));
         }
     }
 }

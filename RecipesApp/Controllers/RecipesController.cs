@@ -50,7 +50,7 @@ namespace RecipesApp.Controllers
 
         // POST api/recipes
         [HttpPost]
-        public async Task<IActionResult> Post(RecipeUpsertDto recipeDto)
+        public async Task<IActionResult> Post(RecipeCreateDto recipeDto)
         {
             var recipe = await RecipeService.AddAsync(recipeDto);
 
@@ -71,7 +71,7 @@ namespace RecipesApp.Controllers
 
         // PUT api/recipes/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, RecipeUpsertDto recipeDto)
+        public async Task<IActionResult> Put(int id, RecipeUpdateDto recipeDto)
         {
             var result = await RecipeService.UpdateAsync(id, recipeDto);
 

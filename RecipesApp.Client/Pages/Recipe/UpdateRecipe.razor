@@ -33,7 +33,40 @@ else
             <label for="text" class="form-label">Text</label>
             <InputText id="text" class="form-control" @bind-Value="model.Text" />
         </div>
-        <InputFile OnChange="HandleFileChange" />
+
+        
+        <div class="mb-3">
+            @if (model.UseOldPicture)
+            {
+                @if (OldPictureUrl is not null)
+                {
+                    <label>Preview:</label>
+                    <img src="@OldPictureUrl" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                }
+            }
+            else
+            {
+                @if (model.FileContent != null)
+                {
+                    <label>Preview:</label>
+                    <img src="data:image;base64,@Convert.ToBase64String(model.FileContent)" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                    <button class="btn btn-danger" @onclick="RemovePicture">Remove Picture</button>                    
+                }
+            }               
+        </div>
+
+        @if (model.UseOldPicture)
+        {
+            <button type="button" class="btn btn-warning" @onclick="@(_ => model.UseOldPicture = false)">Choose new picture</button>
+        }
+        else
+        {
+            <InputFile OnChange="HandleFileChange" @key="fileInputKey" />
+            @if (OldPictureUrl is not null)
+            {
+                <button type="button" class="btn btn-warning" @onclick="@(_ => model.UseOldPicture = true)">Use Old Picture</button>
+            }
+        }
         <button type="submit" class="btn btn-primary" disabled="@(!context.Validate() || isSubmitting)">Update</button>
     </EditForm>
 }
@@ -41,10 +74,12 @@ else
 @code {
     [Parameter] public int? Id { get; set; }
 
-    RecipeUpsertDto? model;
+    RecipeUpdateDto? model;
+    private string? OldPictureUrl;
     string? updateError;
     string? deleteError;
     string? fetchError;
+    string fileInputKey = Guid.NewGuid().ToString();
     bool isSubmitting;
 
     protected override async Task OnParametersSetAsync()
@@ -60,7 +95,10 @@ else
             if (response.Result is null)
                 NavigationManager.NavigateTo("recipes");
             else
-                model = Mapper.Map<RecipeUpsertDto>(response.Result);
+            {
+                model = Mapper.Map<RecipeUpdateDto>(response.Result);
+                OldPictureUrl = response.Result.ImageUrl;
+            }      
         }
     }
 
@@ -80,6 +118,17 @@ else
 
         // Set the file name
         model.FileName = file.Name;
+    }
+
+    void RemovePicture()
+    {
+        if (model is null)
+            return;
+
+        model.FileContent = null;
+        model.FileName = null;
+
+        fileInputKey = Guid.NewGuid().ToString();
     }
 
     async Task HandleValidSubmit()

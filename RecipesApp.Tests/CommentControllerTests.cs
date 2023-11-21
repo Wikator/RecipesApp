@@ -1,4 +1,4 @@
-﻿namespace RecipeApp.Tests
+﻿namespace RecipesApp.Tests
 {
     public class CommentControllerTests
     {

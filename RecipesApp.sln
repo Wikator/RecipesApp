@@ -5,7 +5,7 @@ VisualStudioVersion = 17.8.34309.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RecipesApp.Shared", "RecipesApp.Shared\RecipesApp.Shared.csproj", "{ED6B79C0-8E75-430B-979B-95F9557D909F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RecipeApp.Tests", "RecipeApp.Tests\RecipeApp.Tests.csproj", "{44A0F76D-A12E-4E9A-BB59-8849364A867F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RecipesApp.Tests", "RecipesApp.Tests\RecipesApp.Tests.csproj", "{44A0F76D-A12E-4E9A-BB59-8849364A867F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RecipesApp", "RecipesApp\RecipesApp.csproj", "{A13A2BFA-3482-4960-A208-FA638E9386A3}"
 EndProject

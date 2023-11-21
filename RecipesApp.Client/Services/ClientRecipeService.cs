@@ -11,7 +11,7 @@ namespace RecipesApp.Client.Services
         private HttpClient Http { get; } = http;
         private const string BaseUrl = "api/recipes/";
 
-        public async Task<ServiceResult<RecipeReadOnlyDetailsDto>> AddAsync(RecipeUpsertDto item)
+        public async Task<ServiceResult<RecipeReadOnlyDetailsDto>> AddAsync(RecipeCreateDto item)
         {
             var response = await Http.PostAsJsonAsync(BaseUrl, item);
 
@@ -80,7 +80,7 @@ namespace RecipesApp.Client.Services
             return ServiceResult<PagedList<RecipeReadOnlyDto>>.GenerateSuccessfulResult(pagedRecipes, response.StatusCode);
         }
 
-        public async Task<ServiceResult> UpdateAsync(int id, RecipeUpsertDto item)
+        public async Task<ServiceResult> UpdateAsync(int id, RecipeUpdateDto item)
         {
             var response = await Http.PutAsJsonAsync($"{BaseUrl}{id}", item);
 

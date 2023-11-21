@@ -33,7 +33,7 @@ namespace RecipesApp.Shared.Interfaces
         /// <param name="item">A dto to convert into entity, and add to database</param>
         /// <returns>201 (with newly added entity), 400</returns>
         /// <exception cref="InvalidOperationException">Called when user is not authenticated</exception>
-        Task<ServiceResult<RecipeReadOnlyDetailsDto>> AddAsync(RecipeUpsertDto item);
+        Task<ServiceResult<RecipeReadOnlyDetailsDto>> AddAsync(RecipeCreateDto item);
 
         /// <summary>
         /// Updates an existing recipes
@@ -42,7 +42,7 @@ namespace RecipesApp.Shared.Interfaces
         /// <param name="item">How the new recipe should look like</param>
         /// <returns>204, 401, 404</returns>
         /// <exception cref="InvalidOperationException">Called when user is not authenticated</exception>
-        Task<ServiceResult> UpdateAsync(int id, RecipeUpsertDto item);
+        Task<ServiceResult> UpdateAsync(int id, RecipeUpdateDto item);
 
         /// <summary>
         /// Removes recipe from database

@@ -9,8 +9,6 @@ using RecipesApp.Shared.DTOs.Recipe;
 using System.Net;
 using RecipesApp.Shared.Helpers;
 using RecipesApp.Shared.Interfaces;
-using System.Reflection;
-using System.Text;
 using System.Linq.Dynamic.Core;
 
 namespace RecipesApp.Services
@@ -23,7 +21,7 @@ namespace RecipesApp.Services
         private IHttpContextAccessor HttpContext { get; } = httpContextAccessor;
         private IPhotoService PhotoService { get; } = photoService;
 
-        public async Task<ServiceResult<RecipeReadOnlyDetailsDto>> AddAsync(RecipeUpsertDto item)
+        public async Task<ServiceResult<RecipeReadOnlyDetailsDto>> AddAsync(RecipeCreateDto item)
         {
             var recipe = new Recipe()
             {
@@ -113,7 +111,7 @@ namespace RecipesApp.Services
             return ServiceResult<PagedList<RecipeReadOnlyDto>>.GenerateSuccessfulResult(pagedList, HttpStatusCode.OK);
         }
 
-        public async Task<ServiceResult> UpdateAsync(int id, RecipeUpsertDto item)
+        public async Task<ServiceResult> UpdateAsync(int id, RecipeUpdateDto item)
         {
             var recipe = await Db.Recipes
                 .Include(r => r.Picture)
@@ -128,17 +126,19 @@ namespace RecipesApp.Services
             if (recipe.AuthorId != userId)
                 return ServiceResult.GenerateFailedResult("You can't edit other users' recipes", HttpStatusCode.Unauthorized);
 
-            if (recipe.Picture is not null)
+            if (recipe.Picture is not null && !item.UseOldPicture)
             {
                 var deleteResult = await PhotoService.DeletePhotoAsync(recipe.Picture.PublicId);
 
                 if (deleteResult.Error is not null)
                     return ServiceResult.GenerateFailedResult("Image to replace image. Try again later", HttpStatusCode.BadRequest);
+
+                recipe.Picture = null;
             }
 
             Mapper.Map(item, recipe);
 
-            if (item.FileContent is not null)
+            if (item.FileContent is not null && !item.UseOldPicture)
             {
                 var file = new FormFile(new MemoryStream(item.FileContent), 0, item.FileContent.Length, "file", item.FileName ?? $"recipe {id}");
                 var uploadResult = await PhotoService.AddPhotoAsync(file);

@@ -20,7 +20,7 @@ namespace RecipesApp.Data
                 .HasOne(c => c.Author)
                 .WithMany(a => a.Comments)
                 .HasForeignKey(c => c.AuthorId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Restrict);
 
             base.OnModelCreating(modelBuilder);
 
