@@ -8,18 +8,13 @@
             // Arrange
             var commentServiceMock = new Mock<ICommentService>();
             commentServiceMock.Setup(x => x.GetComments(It.IsAny<int>()))
-                .ReturnsAsync(new ServiceResult<IEnumerable<CommentReadOnlyDto>>
+                .ReturnsAsync(new List<CommentReadOnlyDto>
                 {
-                    Result = new List<CommentReadOnlyDto>
+                    new()
                     {
-                        new()
-                        {
-                            Id = 1,
-                            Text = "Test Comment",
-                        }
-                    },
-                    IsSuccessful = true,
-                    StatusCode = HttpStatusCode.OK
+                        Id = 1,
+                        Text = "Test Comment",
+                    }
                 });
 
             var controller = new CommentsController(commentServiceMock.Object);

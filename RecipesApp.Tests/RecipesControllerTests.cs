@@ -7,22 +7,17 @@
         {
             // Arrange
             var recipeServiceMock = new Mock<IRecipeService>();
-            recipeServiceMock.Setup(x => x.GetAllAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>
+            recipeServiceMock.Setup(x => x.GetAllAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new List<RecipeReadOnlyDetailsDto>
             {
-                Result = new List<RecipeReadOnlyDetailsDto> 
-                { 
-                    new() 
-                    { 
-                        Id = 1,
-                        Name = "Test Recipe",
-                        Author = new ApplicationUserReadOnlyDto
-                        { 
-                            UserName = "User 1"
-                        } 
-                   } 
-                },
-                IsSuccessful = true,
-                StatusCode = HttpStatusCode.OK
+                new()
+                {
+                    Id = 1,
+                    Name = "Test Recipe",
+                    Author = new ApplicationUserReadOnlyDto
+                    {
+                        UserName = "User 1"
+                    }
+                }
             });
 
             var controller = new RecipesController(recipeServiceMock.Object);
@@ -40,23 +35,17 @@
             // Arrange
             var recipeServiceMock = new Mock<IRecipeService>();
             recipeServiceMock.Setup(x => x.GetPagedItemsAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(
-                new ServiceResult<PagedList<RecipeReadOnlyDto>>
-                {
-                    Result = new PagedList<RecipeReadOnlyDto>(new List<RecipeReadOnlyDto>
+                new PagedList<RecipeReadOnlyDto>(new List<RecipeReadOnlyDto>{
+                    new()
                     {
-                        new()
+                        Id = 1,
+                        Name = "Test Recipe",
+                        Author = new ApplicationUserReadOnlyDto
                         {
-                            Id = 1,
-                            Name = "Test Recipe",
-                            Author = new ApplicationUserReadOnlyDto
-                            {
-                                UserName = "User 1"
-                            }
+                            UserName = "User 1"
                         }
-                    }, 1, 5, 1),
-                    IsSuccessful = true,
-                    StatusCode = HttpStatusCode.OK
-                });
+                    } 
+                }, 1, 5, 5));
 
             var controller = new RecipesController(recipeServiceMock.Object);
 

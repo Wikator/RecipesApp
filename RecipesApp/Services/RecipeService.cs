@@ -23,11 +23,16 @@ namespace RecipesApp.Services
 
         public async Task<ServiceResult<RecipeReadOnlyDetailsDto>> AddAsync(RecipeCreateDto item)
         {
+            var userId = HttpContext.HttpContext?.User.GetLoggedInUserId();
+
+            if (userId is null)
+                return ServiceResult<RecipeReadOnlyDetailsDto>
+                    .GenerateFailedResult("User unauthorized", HttpStatusCode.Unauthorized);
+
             var recipe = new Recipe()
             {
                 Name = item.Name,
-                AuthorId = HttpContext.HttpContext?.User.GetLoggedInUserId()
-                    ?? throw new Exception()
+                AuthorId = userId
             };
             
             Mapper.Map(item, recipe);
@@ -90,7 +95,7 @@ namespace RecipesApp.Services
             return ServiceResult.GenerateSuccessfulResult(HttpStatusCode.NoContent);
         }
 
-        public async Task<ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>> GetAllAsync(string? orderQuerry,
+        public async Task<IEnumerable<RecipeReadOnlyDetailsDto>> GetAllAsync(string? orderQuerry,
             string? filter)
         {
             var query = filter switch
@@ -99,13 +104,10 @@ namespace RecipesApp.Services
                 _ => Db.Recipes.Where(r => r.Name.Contains(filter))
             };
 
-            var recipes = await query
+            return await query
                 .ProjectTo<RecipeReadOnlyDetailsDto>(Mapper.ConfigurationProvider)
                 .ApplySort(orderQuerry)
                 .ToListAsync();
-
-            return ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>
-                .GenerateSuccessfulResult(recipes, HttpStatusCode.OK);
         }
 
         public async Task<ServiceResult<RecipeReadOnlyDetailsDto>> GetByIdAsync(int id)
@@ -122,7 +124,7 @@ namespace RecipesApp.Services
             return ServiceResult<RecipeReadOnlyDetailsDto>.GenerateSuccessfulResult(recipe, HttpStatusCode.OK);
         }
 
-        public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage,
+        public async Task<PagedList<RecipeReadOnlyDto>> GetPagedItemsAsync(int pageNumber, int itemsPerPage,
             string? orderQuerry, string? filter)
         {
             var query = filter switch
@@ -131,12 +133,10 @@ namespace RecipesApp.Services
                 _ => Db.Recipes.Where(r => r.Name.Contains(filter))
             };
 
-            var pagedList = await query
+            return await query
                 .ApplySort(orderQuerry)
                 .ProjectTo<RecipeReadOnlyDto>(Mapper.ConfigurationProvider)
                 .CreatePagedList(pageNumber, itemsPerPage);
-
-            return ServiceResult<PagedList<RecipeReadOnlyDto>>.GenerateSuccessfulResult(pagedList, HttpStatusCode.OK);
         }
 
         public async Task<ServiceResult> UpdateAsync(int id, RecipeUpdateDto item)

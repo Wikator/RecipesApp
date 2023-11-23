@@ -24,19 +24,18 @@ namespace RecipesApp.Controllers
         {       
             if (paginationParams.PageNumber is null || paginationParams.PageSize is null)
             {
-                var recipe = (await RecipeService.GetAllAsync(paginationParams.OrderBy, paginationParams.Filter)).Result
-                    ?? throw new Exception("Recipes not present, despite operation completing successfully");
-
-                return Ok(recipe);
+                var recipes = await RecipeService.GetAllAsync(paginationParams.OrderBy, paginationParams.Filter);
+                return Ok(recipes);
             }
 
-            var recipes = (await RecipeService
+            var paginatedRecipes = await RecipeService
                 .GetPagedItemsAsync(paginationParams.PageNumber.Value, paginationParams.PageSize.Value,
-                    paginationParams.OrderBy, paginationParams.Filter)).Result
-                        ?? throw new Exception("Recipes not present, despite operation completing successfully");
+                    paginationParams.OrderBy, paginationParams.Filter);
 
-            Response.AddPaginationHeader(recipes.PageNumber, recipes.PageSize, recipes.TotalCount, recipes.TotalPages);
-            return Ok(recipes);
+            Response.AddPaginationHeader(paginatedRecipes.PageNumber, paginatedRecipes.PageSize,
+                paginatedRecipes.TotalCount, paginatedRecipes.TotalPages);
+
+            return Ok(paginatedRecipes);
         }
 
         // GET api/recipes/5
@@ -58,19 +57,13 @@ namespace RecipesApp.Controllers
         {
             var recipe = await RecipeService.AddAsync(recipeDto);
 
-            switch (recipe.StatusCode)
+            return recipe.StatusCode switch
             {
-                case HttpStatusCode.Created:
-                    var item = recipe.Result
-                        ?? throw new Exception("Recipe not present, despite operation completing successfully");
-
-                    return CreatedAtAction(nameof(Get), new { id =  item.Id }, item);
-
-                case HttpStatusCode.BadRequest:
-                    return BadRequest(recipe.Message);
-
-                default: throw new Exception();
-            }
+                HttpStatusCode.Created => CreatedAtAction(nameof(Get), new { id = recipe.Result!.Id }, recipe.Result!),
+                HttpStatusCode.Unauthorized => BadRequest(recipe.Message),
+                HttpStatusCode.BadRequest => BadRequest(recipe.Message),
+                _ => throw new Exception()
+            };
         }
 
         // PUT api/recipes/5

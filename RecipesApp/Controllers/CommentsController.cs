@@ -17,8 +17,7 @@ namespace RecipesApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Get(int id) 
         {
-            var comments = (await CommentService.GetComments(id)).Result
-                ?? throw new Exception("Comments not present, despite operation completing successfully");
+            var comments = (await CommentService.GetComments(id));
 
             return Ok(comments);   
         }
@@ -26,10 +25,14 @@ namespace RecipesApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(CommentUpsertDto dto)
         {
-            var comment = (await CommentService.AddComment(dto)).Result
-                ?? throw new Exception("Comment not present, despite operation completing successfully");
+            var comment = (await CommentService.AddComment(dto));
 
-            return CreatedAtAction(nameof(Get), new { id = dto.RecipeId}, comment);
+            return comment.StatusCode switch
+            {
+                HttpStatusCode.Created => CreatedAtAction(nameof(Get), new { id = dto.RecipeId }, comment!),
+                HttpStatusCode.Unauthorized => Unauthorized(comment.Message),
+                _ => throw new Exception()
+            };
         }
 
         [HttpPut("{id}")]

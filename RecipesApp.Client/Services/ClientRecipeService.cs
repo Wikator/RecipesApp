@@ -39,14 +39,12 @@ namespace RecipesApp.Client.Services
             return ServiceResult.GenerateFailedResult(message, response.StatusCode);
         }
 
-        public async Task<ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>> GetAllAsync(string? orderQuerry,
+        public async Task<IEnumerable<RecipeReadOnlyDetailsDto>> GetAllAsync(string? orderQuerry,
             string? filter)
         {
             var url = $"{BaseUrl}?orderBy={orderQuerry}&filter={filter}";
-            var recipes = await Http.GetFromJsonAsync<IEnumerable<RecipeReadOnlyDetailsDto>>(url)
+            return await Http.GetFromJsonAsync<IEnumerable<RecipeReadOnlyDetailsDto>>(url)
                 ?? Enumerable.Empty<RecipeReadOnlyDetailsDto>();
-
-            return ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>.GenerateSuccessfulResult(recipes, System.Net.HttpStatusCode.OK);
         }
 
         public async Task<ServiceResult<RecipeReadOnlyDetailsDto>> GetByIdAsync(int id)
@@ -65,7 +63,7 @@ namespace RecipesApp.Client.Services
             return ServiceResult<RecipeReadOnlyDetailsDto>.GenerateFailedResult(message, response.StatusCode);
         }
 
-        public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage,
+        public async Task<PagedList<RecipeReadOnlyDto>> GetPagedItemsAsync(int pageNumber, int itemsPerPage,
             string? orderQuerry, string? filter)
         {
             var url = $"{BaseUrl}?pageNumber={pageNumber}&pageSize={itemsPerPage}&orderBy={orderQuerry}&filter={filter}";
@@ -80,10 +78,8 @@ namespace RecipesApp.Client.Services
             var deserializedPaginationHeader = JsonConvert.DeserializeObject<PaginationHeader>(paginationHeader)
                 ?? throw new Exception();
 
-            var pagedRecipes =  new PagedList<RecipeReadOnlyDto>(recipes, deserializedPaginationHeader.CurrentPage,
+            return  new PagedList<RecipeReadOnlyDto>(recipes, deserializedPaginationHeader.CurrentPage,
                 deserializedPaginationHeader.ItemsPerPage, deserializedPaginationHeader.TotalItems);
-
-            return ServiceResult<PagedList<RecipeReadOnlyDto>>.GenerateSuccessfulResult(pagedRecipes, response.StatusCode);
         }
 
         public async Task<ServiceResult> UpdateAsync(int id, RecipeUpdateDto item)

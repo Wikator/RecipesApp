@@ -39,13 +39,10 @@ namespace RecipesApp.Client.Services
             return ServiceResult.GenerateSuccessfulResult(response.StatusCode);
         }
 
-        public async Task<ServiceResult<IEnumerable<CommentReadOnlyDto>>> GetComments(int recipeId)
+        public async Task<IEnumerable<CommentReadOnlyDto>> GetComments(int recipeId)
         {
-            var comments = await Http.GetFromJsonAsync<IEnumerable<CommentReadOnlyDto>>(BaseUrl + recipeId)
+            return await Http.GetFromJsonAsync<IEnumerable<CommentReadOnlyDto>>(BaseUrl + recipeId)
                 ?? Enumerable.Empty<CommentReadOnlyDto>();
-
-            return ServiceResult<IEnumerable<CommentReadOnlyDto>>.GenerateSuccessfulResult(comments,
-                System.Net.HttpStatusCode.OK);
         }
 
         public async Task<ServiceResult> UpdateComment(int id, CommentUpsertDto item)

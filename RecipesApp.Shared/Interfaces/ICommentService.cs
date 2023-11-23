@@ -10,7 +10,7 @@ namespace RecipesApp.Shared.Interfaces
         /// </summary>
         /// <param name="recipeId">Id of a recipe</param>
         /// <returns>200 (with comments)</returns>
-        Task<ServiceResult<IEnumerable<CommentReadOnlyDto>>> GetComments(int recipeId);
+        Task<IEnumerable<CommentReadOnlyDto>> GetComments(int recipeId);
 
         /// <summary>
         /// Add a new comment to database

@@ -11,7 +11,7 @@ namespace RecipesApp.Shared.Interfaces
         /// <param name="orderQuerry">Ordering separeted by commas, for example: name,likes desc</param>
         /// <param name="filter">Filtering by name</param>
         /// <returns>200 (with all recipes)</returns>
-        Task<ServiceResult<IEnumerable<RecipeReadOnlyDetailsDto>>> GetAllAsync(string? orderQuerry,
+        Task<IEnumerable<RecipeReadOnlyDetailsDto>> GetAllAsync(string? orderQuerry,
             string? filter);
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace RecipesApp.Shared.Interfaces
         /// <param name="orderQuerry">Ordering separeted by commas, for example: name,likes desc</param>
         /// <param name="filter">Filtering by name</param>
         /// <returns>200 (with paginated recipes)</returns>
-        Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetPagedItemsAsync(int pageNumber, int itemsPerPage,
+        Task<PagedList<RecipeReadOnlyDto>> GetPagedItemsAsync(int pageNumber, int itemsPerPage,
             string? orderQuerry, string? filter);
 
         /// <summary>

@@ -67,17 +67,17 @@
                     sb.Append(curr.PropertyName + (curr.Direction == SortDirection.Descending ? " desc" : string.Empty) + ',')
                 );         
 
-                var response = await RecipeService.GetPagedItemsAsync(
+                var pagedList = await RecipeService.GetPagedItemsAsync(
                     req.StartIndex / req.Count + 1 ?? 1, 
                     req.Count ?? int.MaxValue,
                     stringQuerry.ToString(),
                     nameSearch
                     );
                 
-                if (response.Result is null)
+                if (pagedList is null)
                     return EmptyProvider();
 
-                return GridItemsProviderResult.From(response.Result, response.Result.TotalCount);
+                return GridItemsProviderResult.From(pagedList, pagedList.TotalCount);
             }
             catch
             {

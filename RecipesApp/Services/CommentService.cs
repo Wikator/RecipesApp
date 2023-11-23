@@ -21,11 +21,16 @@ namespace RecipesApp.Services
 
         public async Task<ServiceResult<CommentReadOnlyDto>> AddComment(CommentUpsertDto item)
         {
+            var userId = HttpContext.HttpContext?.User.GetLoggedInUserId();
+
+            if (userId is null)
+                return ServiceResult<CommentReadOnlyDto>
+                    .GenerateFailedResult("User unauthorized", HttpStatusCode.Unauthorized);
+
             var comment = new Comment()
             {
                 Text = item.Text,
-                AuthorId = HttpContext.HttpContext?.User.GetLoggedInUserId()
-                    ?? throw new Exception()
+                AuthorId = userId
             };
 
             Mapper.Map(item, comment);
@@ -56,15 +61,12 @@ namespace RecipesApp.Services
             return ServiceResult.GenerateSuccessfulResult(HttpStatusCode.NoContent);
         }
 
-        public async Task<ServiceResult<IEnumerable<CommentReadOnlyDto>>> GetComments(int recipeId)
+        public async Task<IEnumerable<CommentReadOnlyDto>> GetComments(int recipeId)
         {
-            var comments = await Db.Comments
+            return await Db.Comments
                 .Where(c => c.RecipeId == recipeId)
                 .ProjectTo<CommentReadOnlyDto>(Mapper.ConfigurationProvider)
                 .ToListAsync();
-
-            return ServiceResult<IEnumerable<CommentReadOnlyDto>>
-                .GenerateSuccessfulResult(comments, HttpStatusCode.OK);
         }
 
         public async Task<ServiceResult> UpdateComment(int id, CommentUpsertDto item)
