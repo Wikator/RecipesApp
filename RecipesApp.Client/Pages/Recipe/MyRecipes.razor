@@ -1,8 +1,10 @@
-﻿@page "/recipes"
+﻿@page "/my_recipes"
 @inject IRecipeService RecipeService
 @rendermode @(new InteractiveAutoRenderMode(prerender: false))
 
-<h3>Recipes</h3>
+<h3>Your recipes</h3>
+
+<NavLink class="btn btn-dark" href="/recipes/create">Create new</NavLink>
 
 <div class="page-size-chooser">
     Items per page:
@@ -18,7 +20,7 @@
     <TemplateColumn Title="Picture">
         <div class="flex items-center">
             <img src="@(context.ImageUrl)" alt="@context.Name" width="200" height="150" />
-        </div>     
+        </div>
     </TemplateColumn>
     <PropertyColumn Property="@(r => r.Name)" Sortable="true">
         <ColumnOptions>
@@ -28,8 +30,9 @@
         </ColumnOptions>
     </PropertyColumn>
     <PropertyColumn Title="Author" Property="@(r => r.Author.UserName)" />
-    <TemplateColumn Title="Action">
-        <NavLink class="btn btn-info" href="@($"recipes/details/{context.Id}")">Show</NavLink>
+    <TemplateColumn Title="Actions">
+        <NavLink class="btn btn-warning" href="@($"recipes/update/{context.Id}")">Edit</NavLink>
+        <button class="btn btn-danger" @onclick="@(_ => DeleteRecipeAsync(context.Id))">Delete</button>
     </TemplateColumn>
 </QuickGrid>
 
@@ -41,6 +44,7 @@
     PaginationState pagination = new PaginationState { ItemsPerPage = 5 };
     GridItemsProvider<RecipeReadOnlyDto>? recipeProvider;
     string? nameSearch;
+    string? deleteErrorMessage;
 
     string? NameSearch
     {
@@ -49,7 +53,7 @@
         {
             nameSearch = value;
 
-            if(grid is not null)
+            if (grid is not null)
                 _ = grid.RefreshDataAsync();
         }
     }
@@ -62,25 +66,35 @@
             {
                 var stringQuerry = req.GetSortByProperties().Aggregate(new StringBuilder(), (sb, curr) =>
                     sb.Append(curr.PropertyName + (curr.Direction == SortDirection.Descending ? " desc" : string.Empty) + ',')
-                );         
+                );
 
-                var pagedList = await RecipeService.GetPagedItemsAsync(
-                    req.StartIndex / req.Count + 1 ?? 1, 
+                var result = await RecipeService.GetUserPagedItemsAsync(
+                    req.StartIndex / req.Count + 1 ?? 1,
                     req.Count ?? int.MaxValue,
                     stringQuerry.ToString(),
                     nameSearch
                     );
-                
-                if (pagedList is null)
+
+                if (result.Data is null)
                     return EmptyProvider();
 
-                return GridItemsProviderResult.From(pagedList, pagedList.TotalCount);
+                return GridItemsProviderResult.From(result.Data, result.Data.TotalCount);
             }
             catch
             {
                 return EmptyProvider();
-            } 
-        };      
+            }
+        };
+    }
+
+    private async Task DeleteRecipeAsync(int id)
+    {
+        var result = await RecipeService.DeleteAsync(id);
+
+        if (result.IsSuccessful)
+            await grid!.RefreshDataAsync();
+        else
+            deleteErrorMessage = result.Message;
     }
 
     private GridItemsProviderResult<RecipeReadOnlyDto> EmptyProvider() =>

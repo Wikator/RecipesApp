@@ -64,7 +64,7 @@
             recipeServiceMock.Setup(x => x.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(
                 new ServiceResult<RecipeReadOnlyDetailsDto>
                 {
-                    Result = new RecipeReadOnlyDetailsDto
+                    Data = new RecipeReadOnlyDetailsDto
                     { 
                         Id = 1,
                         Name = "Test Recipe",
@@ -91,7 +91,7 @@
             // Arrange
             var recipeServiceMock = new Mock<IRecipeService>();
             recipeServiceMock.Setup(x => x.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(
-                new ServiceResult<RecipeReadOnlyDetailsDto> { Result = null, StatusCode = HttpStatusCode.NotFound });
+                new ServiceResult<RecipeReadOnlyDetailsDto> { Data = null, StatusCode = HttpStatusCode.NotFound });
 
             var controller = new RecipesController(recipeServiceMock.Object);
 
@@ -111,7 +111,7 @@
                 new ServiceResult<RecipeReadOnlyDetailsDto>
                 {
                     StatusCode = HttpStatusCode.Created,
-                    Result = new RecipeReadOnlyDetailsDto
+                    Data = new RecipeReadOnlyDetailsDto
                     {
                         Id = 1,
                         Name = "Test Recipe",

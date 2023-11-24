@@ -122,12 +122,12 @@ else
         {
             var response = await RecipeService.GetByIdAsync(Id.Value);
 
-            if (response.Result is null)
+            if (response.Data is null)
                 NavigationManager.NavigateTo("recipes");
             else
             {
-                model = Mapper.Map<RecipeUpdateDto>(response.Result);
-                OldPictureUrl = response.Result.ImageUrl;
+                model = Mapper.Map<RecipeUpdateDto>(response.Data);
+                OldPictureUrl = response.Data.ImageUrl;
             }      
         }
     }

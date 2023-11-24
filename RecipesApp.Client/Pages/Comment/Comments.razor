@@ -53,9 +53,9 @@
 
         var response = await CommentService.AddComment(model);
 
-        if (response.Result is not null)
+        if (response.Data is not null)
         {
-            CommentList.Add(response.Result);
+            CommentList.Add(response.Data);
             model = null;
         }
         else

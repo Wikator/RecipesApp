@@ -39,14 +39,6 @@ namespace RecipesApp.Client.Services
             return ServiceResult.GenerateFailedResult(message, response.StatusCode);
         }
 
-        public async Task<IEnumerable<RecipeReadOnlyDetailsDto>> GetAllAsync(string? orderQuerry,
-            string? filter)
-        {
-            var url = $"{BaseUrl}?orderBy={orderQuerry}&filter={filter}";
-            return await Http.GetFromJsonAsync<IEnumerable<RecipeReadOnlyDetailsDto>>(url)
-                ?? Enumerable.Empty<RecipeReadOnlyDetailsDto>();
-        }
-
         public async Task<ServiceResult<RecipeReadOnlyDetailsDto>> GetByIdAsync(int id)
         {
             var response = await Http.GetAsync($"{BaseUrl}{id}");
@@ -93,6 +85,33 @@ namespace RecipesApp.Client.Services
 
             var message = await response.Content.ReadAsStringAsync();
             return ServiceResult.GenerateFailedResult(message, response.StatusCode);
+        }
+
+        public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetUserPagedItemsAsync(int pageNumber, int itemsPerPage, string? orderQuerry, string? filter)
+        {
+            var url = $"{BaseUrl}my_recipes/?pageNumber={pageNumber}&pageSize={itemsPerPage}&orderBy={orderQuerry}&filter={filter}";
+
+            var response = await Http.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                return ServiceResult<PagedList<RecipeReadOnlyDto>>.GenerateFailedResult(message, response.StatusCode);
+            }
+
+            var recipes = await response.Content.ReadFromJsonAsync<IEnumerable<RecipeReadOnlyDto>>()
+                ?? throw new Exception();
+
+            var paginationHeader = response.Headers.GetValues("Pagination").FirstOrDefault()
+                ?? throw new Exception();
+
+            var deserializedPaginationHeader = JsonConvert.DeserializeObject<PaginationHeader>(paginationHeader)
+                ?? throw new Exception();
+
+            var pagedRecipes = new PagedList<RecipeReadOnlyDto>(recipes, deserializedPaginationHeader.CurrentPage,
+                deserializedPaginationHeader.ItemsPerPage, deserializedPaginationHeader.TotalItems);
+
+            return ServiceResult<PagedList<RecipeReadOnlyDto>>.GenerateSuccessfulResult(pagedRecipes, response.StatusCode);
         }
     }
 }

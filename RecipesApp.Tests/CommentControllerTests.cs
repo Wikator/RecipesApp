@@ -34,7 +34,7 @@
             commentServiceMock.Setup(x => x.AddComment(It.IsAny<CommentUpsertDto>()))
                 .ReturnsAsync(new ServiceResult<CommentReadOnlyDto>
                 {
-                    Result = new CommentReadOnlyDto
+                    Data = new CommentReadOnlyDto
                     {
                         Id = 1,
                         Text = "Test Comment"

@@ -95,21 +95,6 @@ namespace RecipesApp.Services
             return ServiceResult.GenerateSuccessfulResult(HttpStatusCode.NoContent);
         }
 
-        public async Task<IEnumerable<RecipeReadOnlyDetailsDto>> GetAllAsync(string? orderQuerry,
-            string? filter)
-        {
-            var query = filter switch
-            {
-                null => Db.Recipes,
-                _ => Db.Recipes.Where(r => r.Name.Contains(filter))
-            };
-
-            return await query
-                .ProjectTo<RecipeReadOnlyDetailsDto>(Mapper.ConfigurationProvider)
-                .ApplySort(orderQuerry)
-                .ToListAsync();
-        }
-
         public async Task<ServiceResult<RecipeReadOnlyDetailsDto>> GetByIdAsync(int id)
         {
             var recipe = await Db.Recipes
@@ -137,6 +122,27 @@ namespace RecipesApp.Services
                 .ApplySort(orderQuerry)
                 .ProjectTo<RecipeReadOnlyDto>(Mapper.ConfigurationProvider)
                 .CreatePagedList(pageNumber, itemsPerPage);
+        }
+
+        public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetUserPagedItemsAsync(int pageNumber, int itemsPerPage, string? orderQuerry, string? filter)
+        {
+            var userId = HttpContext.HttpContext?.User.GetLoggedInUserId();
+
+            if (userId is null)
+                return ServiceResult<PagedList<RecipeReadOnlyDto>>
+                    .GenerateFailedResult("User unauthorized", HttpStatusCode.Unauthorized);
+
+            var query = Db.Recipes.Where(r => r.AuthorId == userId);
+
+            if (filter is not null)
+                query = query.Where(filter);
+
+            var recipes = await query
+                .ApplySort(orderQuerry)
+                .ProjectTo<RecipeReadOnlyDto>(Mapper.ConfigurationProvider)
+                .CreatePagedList(pageNumber, itemsPerPage);
+
+            return ServiceResult<PagedList<RecipeReadOnlyDto>>.GenerateSuccessfulResult(recipes, HttpStatusCode.OK);
         }
 
         public async Task<ServiceResult> UpdateAsync(int id, RecipeUpdateDto item)

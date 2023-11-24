@@ -6,15 +6,6 @@ namespace RecipesApp.Shared.Interfaces
     public interface IRecipeService
     {
         /// <summary>
-        /// Gets all existing recipes
-        /// </summary>
-        /// <param name="orderQuerry">Ordering separeted by commas, for example: name,likes desc</param>
-        /// <param name="filter">Filtering by name</param>
-        /// <returns>200 (with all recipes)</returns>
-        Task<IEnumerable<RecipeReadOnlyDetailsDto>> GetAllAsync(string? orderQuerry,
-            string? filter);
-
-        /// <summary>
         /// Gets a recipe by id
         /// </summary>
         /// <param name="id">Id of recipe to retrieve</param>
@@ -30,6 +21,17 @@ namespace RecipesApp.Shared.Interfaces
         /// <param name="filter">Filtering by name</param>
         /// <returns>200 (with paginated recipes)</returns>
         Task<PagedList<RecipeReadOnlyDto>> GetPagedItemsAsync(int pageNumber, int itemsPerPage,
+            string? orderQuerry, string? filter);
+
+        /// <summary>
+        /// Gets paginated recipes belgonging to authorized user
+        /// </summary>
+        /// <param name="pageNumber">Number of a page</param>
+        /// <param name="itemsPerPage">How many recipes should there be on one page</param>
+        /// <param name="orderQuerry">Ordering separeted by commas, for example: name,likes desc</param>
+        /// <param name="filter">Filtering by name</param>
+        /// <returns>200 (with paginated recipes)</returns>
+        Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetUserPagedItemsAsync(int pageNumber, int itemsPerPage,
             string? orderQuerry, string? filter);
 
         /// <summary>

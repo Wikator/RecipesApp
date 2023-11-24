@@ -5,7 +5,7 @@ namespace RecipesApp.Shared.Helpers
     public class ServiceResult<T>
     {
         public bool IsSuccessful { get; set; }
-        public T? Result { get; set; }
+        public T? Data { get; set; }
         public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.OK;
         public string Message { get; set; } = "Operation complted succesfully";
 
@@ -13,7 +13,7 @@ namespace RecipesApp.Shared.Helpers
             new()
             {
                 IsSuccessful = true,
-                Result = result,
+                Data = result,
                 StatusCode = statusCode
             };
 

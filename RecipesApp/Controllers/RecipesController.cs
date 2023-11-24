@@ -17,25 +17,41 @@ namespace RecipesApp.Controllers
     {
         private IRecipeService RecipeService { get; } = recipeService;
 
-        // GET: api/recipes?pageNumber=1&pageSize=5
+        // GET: api/recipes
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Get([FromQuery] PaginationParams paginationParams)
         {       
-            if (paginationParams.PageNumber is null || paginationParams.PageSize is null)
-            {
-                var recipes = await RecipeService.GetAllAsync(paginationParams.OrderBy, paginationParams.Filter);
-                return Ok(recipes);
-            }
-
             var paginatedRecipes = await RecipeService
-                .GetPagedItemsAsync(paginationParams.PageNumber.Value, paginationParams.PageSize.Value,
+                .GetPagedItemsAsync(paginationParams.PageNumber, paginationParams.PageSize,
                     paginationParams.OrderBy, paginationParams.Filter);
 
             Response.AddPaginationHeader(paginatedRecipes.PageNumber, paginatedRecipes.PageSize,
                 paginatedRecipes.TotalCount, paginatedRecipes.TotalPages);
 
             return Ok(paginatedRecipes);
+        }
+
+        // GET api/recipes/my_recipes
+        [HttpGet("my_recipes")]
+        public async Task<IActionResult> GetUserRecipes([FromQuery] PaginationParams paginationParams)
+        {
+            var result = await RecipeService
+                .GetUserPagedItemsAsync(paginationParams.PageNumber, paginationParams.PageSize,
+                    paginationParams.OrderBy, paginationParams.Filter);
+
+            switch (result.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    var pagedRecipes = result.Data!;
+                    Response.AddPaginationHeader(pagedRecipes.PageNumber, pagedRecipes.PageSize,
+                        pagedRecipes.TotalCount, pagedRecipes.TotalPages);
+                    return Ok(pagedRecipes);
+                case HttpStatusCode.Unauthorized:
+                    return Unauthorized(result.Message);
+                default:
+                    throw new Exception();
+            }
         }
 
         // GET api/recipes/5
@@ -45,10 +61,10 @@ namespace RecipesApp.Controllers
         {
             var recipe = await RecipeService.GetByIdAsync(id);
 
-            if (recipe.Result is null)
-                return NotFound(recipe.Result);
+            if (recipe.Data is null)
+                return NotFound(recipe.Data);
 
-            return Ok(recipe.Result);
+            return Ok(recipe.Data);
         }
 
         // POST api/recipes
@@ -59,7 +75,7 @@ namespace RecipesApp.Controllers
 
             return recipe.StatusCode switch
             {
-                HttpStatusCode.Created => CreatedAtAction(nameof(Get), new { id = recipe.Result!.Id }, recipe.Result!),
+                HttpStatusCode.Created => CreatedAtAction(nameof(Get), new { id = recipe.Data!.Id }, recipe.Data!),
                 HttpStatusCode.Unauthorized => BadRequest(recipe.Message),
                 HttpStatusCode.BadRequest => BadRequest(recipe.Message),
                 _ => throw new Exception()
