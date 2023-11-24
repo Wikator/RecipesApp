@@ -1,0 +1,49 @@
+﻿<h3>Ingredients</h3>
+<div class="row mb-3">
+    @foreach (var ingredient in IngredientList.Select((value, index) => new { Value = value, Index = index }))
+    {
+        <div class="col-4 mb-2">
+            <div class="mb-3">
+                <label for="@("ingredient-name-" + ingredient.Index)" class="form-label">Text</label>
+                <InputText id="@("ingredient-name-" + ingredient.Index)" class="form-control" @bind-Value="ingredient.Value.Name" />
+                <ValidationMessage For="@(() => ingredient.Value.Name)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="@("ingredient-amount-" + ingredient.Index)" class="form-label">Amount</label>
+                <InputText id="@("ingredient-amount-" + ingredient.Index)" class="form-control" @bind-Value="ingredient.Value.Amount" />
+                <ValidationMessage For="@(() => ingredient.Value.Amount)" />
+            </div>
+            
+            <div class="mb-3">
+                <label for="@("ingredient-notes-" + ingredient.Index)" class="form-label">Notes</label>
+                <InputText id="@("ingredient-notes-" + ingredient.Index)" class="form-control" @bind-Value="ingredient.Value.Notes" />
+                <ValidationMessage For="@(() => ingredient.Value.Notes)" />
+            </div>
+
+            <button type="button" class="btn btn-danger" @onclick="@(_ => RemoveIngredient(ingredient.Value))">Remove this ingredient</button>
+        </div>
+    }
+</div>
+
+<button type="button" class="btn btn-info" @onclick="AddIngredient">Add ingredient</button>
+
+@code {
+    [Parameter, EditorRequired] public List<IngredientUpsertDto> IngredientList { get; init; } = default!;
+
+    void AddIngredient()
+    {
+        var ingredient = new IngredientUpsertDto()
+        {
+            Amount = "0",
+            Name = "New Ingredient"
+        };
+
+        IngredientList.Add(ingredient);
+    }
+
+    void RemoveIngredient(IngredientUpsertDto ingredient)
+    {
+        IngredientList.Remove(ingredient);
+    }
+}

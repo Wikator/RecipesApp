@@ -44,14 +44,14 @@ else
     {
         if (Id is null)
         {
-            NavigationManager.NavigateTo("recipes");
+            NavigationManager.NavigateTo("/");
         }
         else
         {
             var result = await RecipeService.GetByIdAsync(Id.Value);
 
             if (result.Data is null)
-                NavigationManager.NavigateTo("recipes");
+                NavigationManager.NavigateTo("/");
             else
                 recipe = result.Data;
         }

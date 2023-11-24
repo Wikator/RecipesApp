@@ -5,7 +5,7 @@
 @rendermode @(new InteractiveAutoRenderMode(prerender: false))
 @attribute [Authorize]
 
-<h3>Update Recipe</h3>
+<h2>Update Recipe</h2>
 
 @if(model is null)
 {
@@ -31,40 +31,10 @@ else
         </div>
 
         <hr />
-
-        @foreach (var ingredient in model.Ingredients)
-        {
-            var guid = Guid.NewGuid().ToString();
-
-            <div class="mb-3">
-                <label for="@("ingredient-name-" + guid)" class="form-label">Text</label>
-                <InputText id="@("ingredient-name-" + guid)" class="form-control" @bind-Value="ingredient.Name" />
-                <ValidationMessage For="@(() => ingredient.Name)" />
-            </div>
-
-            guid = Guid.NewGuid().ToString();
-
-            <div class="mb-3">
-                <label for="@("ingredient-amount-" + guid)" class="form-label">Amount</label>
-                <InputText id="@("ingredient-amount-" + guid)" class="form-control" @bind-Value="ingredient.Amount" />
-                <ValidationMessage For="@(() => ingredient.Amount)" />
-            </div>
-
-            guid = Guid.NewGuid().ToString();
-
-            <div class="mb-3">
-                <label for="@("ingredient-notes-" + guid)" class="form-label">Notes</label>
-                <InputText id="@("ingredient-notes-" + guid)" class="form-control" @bind-Value="ingredient.Notes" />
-                <ValidationMessage For="@(() => ingredient.Notes)" />
-            </div>
-
-            <button type="button" class="btn btn-danger" @onclick="@(_ => RemoveIngredient(ingredient))">Remove this ingredient</button>
-            <hr />
-        }
-
-        <button type="button" class="btn btn-info" @onclick="AddIngredient">Add ingredient</button>
-
+        <Ingredients IngredientList="model.Ingredients" />
         <hr />
+
+        <h3>Image</h3>
         
         <div class="mb-3">
             @if (model.UseOldPicture)
@@ -72,15 +42,16 @@ else
                 @if (OldPictureUrl is not null)
                 {
                     <label>Preview:</label>
-                    <img src="@OldPictureUrl" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                    <div>
+                        <img src="@OldPictureUrl" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                    </div>       
                 }
             }
             else
             {
                 @if (model.FileContent != null)
                 {
-                    <label>Preview:</label>
-                    <img src="data:image;base64,@Convert.ToBase64String(model.FileContent)" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                    <ImagePreview FileContent="@model.FileContent" />
                     <button class="btn btn-danger" @onclick="RemovePicture">Remove Picture</button>                    
                 }
             }               
@@ -138,32 +109,13 @@ else
             return;
 
         var file = e.File;
-
-        // Read the file content into a byte array
         using (var stream = new MemoryStream())
         {
             await file.OpenReadStream().CopyToAsync(stream);
             model.FileContent = stream.ToArray();
         }
 
-        // Set the file name
         model.FileName = file.Name;
-    }
-
-    void AddIngredient()
-    {
-        var ingredient = new IngredientUpsertDto()
-            {
-                Amount = "0",
-                Name = "New Ingredient"
-            };
-
-        model?.Ingredients.Add(ingredient);
-    }
-
-    void RemoveIngredient(IngredientUpsertDto ingredient)
-    {
-        model?.Ingredients.Remove(ingredient);
     }
 
     void RemovePicture()
