@@ -1,5 +1,6 @@
 ﻿@page "/my_recipes"
 @inject IRecipeService RecipeService
+@attribute [Authorize]
 @rendermode @(new InteractiveAutoRenderMode(prerender: false))
 
 <h3>Your recipes</h3>

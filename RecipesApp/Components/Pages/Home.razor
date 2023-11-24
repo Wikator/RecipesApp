@@ -2,6 +2,26 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<section class="py-5 text-center container">
+    <div class="row py-lg-5">
+        <div class="col-lg-6 col-md-8 mx-auto">
+            <h1 class="fw-light">Recipes!</h1>
+            <p class="lead text-muted">Browse recipes, leave comments, and create your own!</p>
+            <p>
+                <AuthorizeView>
+                    <Authorized>
+                        <NavLink class="btn btn-primary my-2" href="/recipes/create">Create a recipe</NavLink>
+                        <NavLink class="btn btn-secondary my-2" href="/my_recipes">My recipes</NavLink>
+                    </Authorized>
+                    <NotAuthorized>
+                        <NavLink href="Account/Register" class="btn btn-primary my-2">Register</NavLink>
+                        <NavLink href="Account/Login" class="btn btn-secondary my-2">Login</NavLink>
+                    </NotAuthorized>
+                </AuthorizeView>
 
-Welcome to your new app.
+            </p>
+        </div>
+    </div>
+</section>
+
+<Recipes />

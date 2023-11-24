@@ -1,88 +1,99 @@
-﻿@page "/recipes"
-@inject IRecipeService RecipeService
+﻿@inject IRecipeService RecipeService
 @rendermode @(new InteractiveAutoRenderMode(prerender: false))
 
-<h3>Recipes</h3>
-
-<div class="page-size-chooser">
-    Items per page:
-    <select @bind="@pagination.ItemsPerPage">
-        <option>5</option>
-        <option>10</option>
-        <option>20</option>
-        <option>50</option>
-    </select>
+<div class="album py-5 bg-light">
+    <div class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mb-3">
+            @if (recipes is null)
+            {
+                <div class="alert alert-info">Loading...</div>
+            }
+            else
+            {
+                foreach (var recipe in recipes)
+                {
+                    <div class="col">
+                        <div class="card shadow-sm">
+                            <img src="@recipe.ImageUrl" class="card-img-top" width="100%" height="225" role="img" aria-label="Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false" />
+                            <div class="card-body">
+                                <p class="card-text">@recipe.Name</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="btn-group">
+                                        <NavLink href="@($"recipes/details/{recipe.Id}")" class="btn btn-sm btn-outline-secondary">View</NavLink>
+                                    </div>
+                                    <small class="text-muted">@recipe.Author.UserName</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item">
+                    <button class="page-link" @onclick="@(_ => OnPageChange(1))" aria-label="First">
+                        <span aria-hidden="true">&laquo;</span>
+                    </button>
+                </li>
+                <li class="page-item">
+                    <button class="page-link" @onclick="@(_ => OnPageChange(currentPage - 1))" aria-label="Previous">
+                        <span aria-hidden="true">&lsaquo;</span>
+                    </button>
+                </li>
+                @for (var i = currentPage - 2; i <= currentPage + 2; i++)
+                {
+                    if (i > 0 && i <= totalPages)
+                    {
+                        var pageNumber = i;
+                        <li class="page-item @(i == currentPage ? "disabled" : string.Empty)">
+                            <button class="page-link" @onclick="@(_ => OnPageChange(pageNumber))">@pageNumber</button>
+                        </li>
+                    }
+                    else
+                    {
+                        var pageNumber = i;
+                        <li class="page-item disabled">
+                            <button class="page-link">-</button>
+                        </li>
+                    }
+                }
+                <li class="page-item">
+                    <button class="page-link" @onclick="@(_ => OnPageChange(currentPage + 1))" aria-label="Next">
+                        <span aria-hidden="true">&rsaquo;</span>
+                    </button>
+                </li>
+                <li class="page-item">
+                    <button class="page-link" @onclick="@(_ => OnPageChange(totalPages))" aria-label="Last">
+                        <span aria-hidden="true">&raquo;</span>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </div>
-
-<QuickGrid ItemsProvider="recipeProvider" Pagination="@pagination" @ref="grid">
-    <TemplateColumn Title="Picture">
-        <div class="flex items-center">
-            <img src="@(context.ImageUrl)" alt="@context.Name" width="200" height="150" />
-        </div>     
-    </TemplateColumn>
-    <PropertyColumn Property="@(r => r.Name)" Sortable="true">
-        <ColumnOptions>
-            <div class="search-box">
-                <input type="search" autofocus @bind="NameSearch" @bind:event="oninput" placeholder="Recipe name..." />
-            </div>
-        </ColumnOptions>
-    </PropertyColumn>
-    <PropertyColumn Title="Author" Property="@(r => r.Author.UserName)" />
-    <TemplateColumn Title="Action">
-        <NavLink class="btn btn-info" href="@($"recipes/details/{context.Id}")">Show</NavLink>
-    </TemplateColumn>
-</QuickGrid>
-
-<Paginator State="@pagination" />
 
 
 @code {
-    QuickGrid<RecipeReadOnlyDto>? grid;
-    PaginationState pagination = new PaginationState { ItemsPerPage = 5 };
-    GridItemsProvider<RecipeReadOnlyDto>? recipeProvider;
-    string? nameSearch;
+    List<RecipeReadOnlyDto>? recipes;
+    int itemsPerPage = 6;
+    int currentPage = 1;
+    int totalPages = 1;
 
-    string? NameSearch
+    protected override async Task OnInitializedAsync()
     {
-        get => nameSearch;
-        set
-        {
-            nameSearch = value;
-
-            if(grid is not null)
-                _ = grid.RefreshDataAsync();
-        }
+        var pagedRecipes = await RecipeService.GetPagedItemsAsync(currentPage, itemsPerPage, null, null);
+        recipes = pagedRecipes;
+        totalPages = pagedRecipes.TotalPages;
+        currentPage = pagedRecipes.PageNumber;
     }
 
-    protected override void OnInitialized()
+
+    private async Task OnPageChange(int page)
     {
-        recipeProvider = async (req) =>
-        {
-            try
-            {
-                var stringQuerry = req.GetSortByProperties().Aggregate(new StringBuilder(), (sb, curr) =>
-                    sb.Append(curr.PropertyName + (curr.Direction == SortDirection.Descending ? " desc" : string.Empty) + ',')
-                );         
-
-                var pagedList = await RecipeService.GetPagedItemsAsync(
-                    req.StartIndex / req.Count + 1 ?? 1, 
-                    req.Count ?? int.MaxValue,
-                    stringQuerry.ToString(),
-                    nameSearch
-                    );
-                
-                if (pagedList is null)
-                    return EmptyProvider();
-
-                return GridItemsProviderResult.From(pagedList, pagedList.TotalCount);
-            }
-            catch
-            {
-                return EmptyProvider();
-            } 
-        };      
+        var pagedRecipes = await RecipeService.GetPagedItemsAsync(page, itemsPerPage, null, null);
+        recipes = pagedRecipes;
+        totalPages = pagedRecipes.TotalPages;
+        currentPage = pagedRecipes.PageNumber;
     }
-
-    private GridItemsProviderResult<RecipeReadOnlyDto> EmptyProvider() =>
-        GridItemsProviderResult.From(Array.Empty<RecipeReadOnlyDto>(), 0);
 }
