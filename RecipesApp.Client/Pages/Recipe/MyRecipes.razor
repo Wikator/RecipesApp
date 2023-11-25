@@ -17,7 +17,7 @@
     </select>
 </div>
 
-<QuickGrid ItemsProvider="recipeProvider" Pagination="@pagination" @ref="grid">
+<QuickGrid ItemsProvider="recipeProvider" Pagination="@pagination" @ref="grid" Class="border">
     <TemplateColumn Title="Picture">
         <div class="flex items-center">
             <img src="@(context.ImageUrl)" alt="@context.Name" width="200" height="150" />
@@ -30,7 +30,6 @@
             </div>
         </ColumnOptions>
     </PropertyColumn>
-    <PropertyColumn Title="Author" Property="@(r => r.Author.UserName)" />
     <TemplateColumn Title="Actions">
         <NavLink class="btn btn-warning" href="@($"recipes/update/{context.Id}")">Edit</NavLink>
         <button class="btn btn-danger" @onclick="@(_ => DeleteRecipeAsync(context.Id))">Delete</button>

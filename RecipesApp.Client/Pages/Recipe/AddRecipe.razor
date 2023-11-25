@@ -52,15 +52,13 @@
     async Task HandleFileChange(InputFileChangeEventArgs e)
     {
         var file = e.File;
-
-        // Read the file content into a byte array
+        
         using (var stream = new MemoryStream())
         {
             await file.OpenReadStream().CopyToAsync(stream);
             model.FileContent = stream.ToArray();
         }
-
-        // Set the file name
+        
         model.FileName = file.Name;
     }
 
@@ -93,9 +91,9 @@
         isSubmitting = true;
         var response = await RecipeService.AddAsync(model);
 
-        if (response.IsSuccessful)
+        if (response.Data is not null)
         {
-            NavigationManager.NavigateTo("/recipes/details/{Id}");
+            NavigationManager.NavigateTo($"/recipes/details/{response.Data.Id}");
         }
         else
         {

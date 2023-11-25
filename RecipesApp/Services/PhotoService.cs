@@ -26,9 +26,9 @@ namespace RecipesApp.Services
                     File = new FileDescription(file.FileName, stream),
                     Transformation = new Transformation()
                         .Height(500)
-                        .Width(500)
+                        .Width(750)
                         .Crop("fill")
-                        .Gravity("face"),
+                        .Gravity(Gravity.Auto),
                     Folder = "ra-net8"
                 };
 

@@ -14,7 +14,15 @@
                 {
                     <div class="col">
                         <div class="card shadow-sm">
-                            <img src="@recipe.ImageUrl" class="card-img-top" width="100%" height="225" role="img" aria-label="Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false" />
+                            @if (recipe.ImageUrl is not null)
+                            {
+                                <img src="@recipe.ImageUrl" class="card-img-top" height="225" role="img" aria-label="Thumbnail" focusable="false" />
+                            }
+                            else
+                            {
+                                <img src="https://i.stack.imgur.com/y9DpT.jpg" class="card-img-top" height="225" role="img" aria-label="Thumbnail" focusable="false" />
+                            }
+
                             <div class="card-body">
                                 <p class="card-text">@recipe.Name</p>
                                 <div class="d-flex justify-content-between align-items-center">
