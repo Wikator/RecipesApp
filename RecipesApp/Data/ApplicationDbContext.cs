@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RecipesApp.Entities;
@@ -11,6 +12,10 @@ namespace RecipesApp.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<ApplicationUser>()
+                 .HasIndex(u => u.NormalizedEmail)
+                 .IsUnique();
+
             modelBuilder.Entity<Recipe>()
                 .HasOne(r => r.Picture)
                 .WithOne(p => p.Recipe)
@@ -23,6 +28,20 @@ namespace RecipesApp.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             base.OnModelCreating(modelBuilder);
+
+            const string USER_ID = "23bd91c2-6d78-4c12-8b66-be229116d90e";
+            var hasher = new PasswordHasher<ApplicationUser>();
+            modelBuilder.Entity<ApplicationUser>().HasData(new ApplicationUser
+            {
+                Id = USER_ID,
+                UserName = "Wikator",
+                NormalizedUserName = "WIKATOR",
+                Email = "wiktor@szymulewicz.com",
+                NormalizedEmail = "WIKTOR@SZYMULEWICZ.COM",
+                EmailConfirmed = true,
+                PasswordHash = hasher.HashPassword(null, "SOME_ADMIN_PLAIN_PASSWORD"),
+                SecurityStamp = string.Empty
+            });
 
             for (int i = 1; i <= 500; i++)
             {

@@ -24,13 +24,13 @@ namespace RecipesApp.Middleware
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            
+
             switch (exception)
             {
                 case DbUpdateException ex:
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     return context.Response.WriteAsync(ex.Message ?? "Error updating the database.");
-                    
+
                 default:
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     return context.Response.WriteAsync("An unexpected error occurred.");

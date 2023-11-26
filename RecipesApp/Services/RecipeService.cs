@@ -6,10 +6,10 @@ using RecipesApp.Entities;
 using RecipesApp.Extensions;
 using RecipesApp.Services.Contracts;
 using RecipesApp.Shared.DTOs.Recipe;
-using System.Net;
 using RecipesApp.Shared.Helpers;
 using RecipesApp.Shared.Interfaces;
 using System.Linq.Dynamic.Core;
+using System.Net;
 
 namespace RecipesApp.Services
 {
@@ -34,7 +34,7 @@ namespace RecipesApp.Services
                 Name = item.Name,
                 AuthorId = userId
             };
-            
+
             Mapper.Map(item, recipe);
 
             if (item.FileContent is not null)
@@ -50,8 +50,8 @@ namespace RecipesApp.Services
                     return ServiceResult<RecipeReadOnlyDetailsDto>
                         .GenerateFailedResult("Image Failed to save", HttpStatusCode.BadRequest);
 
-                recipe.Picture = new() 
-                { 
+                recipe.Picture = new()
+                {
                     Url = uploadResult.SecureUrl.AbsoluteUri,
                     PublicId = uploadResult.PublicId
                 };
@@ -200,7 +200,7 @@ namespace RecipesApp.Services
                     return ServiceResult
                         .GenerateFailedResult("Image Failed to save", HttpStatusCode.BadRequest);
 
-                recipe.Picture = new() 
+                recipe.Picture = new()
                 {
                     Url = uploadResult.SecureUrl.AbsoluteUri,
                     PublicId = uploadResult.PublicId

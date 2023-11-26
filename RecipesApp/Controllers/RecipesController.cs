@@ -21,7 +21,7 @@ namespace RecipesApp.Controllers
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Get([FromQuery] PaginationParams paginationParams)
-        {       
+        {
             var paginatedRecipes = await RecipeService
                 .GetPagedItemsAsync(paginationParams.PageNumber, paginationParams.PageSize,
                     paginationParams.OrderBy, paginationParams.Filter);
@@ -62,7 +62,7 @@ namespace RecipesApp.Controllers
             var recipe = await RecipeService.GetByIdAsync(id);
 
             if (recipe.Data is null)
-                return NotFound(recipe.Data);
+                return NotFound("Recipe not found");
 
             return Ok(recipe.Data);
         }

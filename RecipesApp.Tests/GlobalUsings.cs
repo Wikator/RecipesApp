@@ -1,11 +1,11 @@
-global using Xunit;
 global using Microsoft.AspNetCore.Mvc;
 global using Moq;
 global using RecipesApp.Controllers;
 global using RecipesApp.Helpers;
+global using RecipesApp.Shared.DTOs.ApplicationUser;
+global using RecipesApp.Shared.DTOs.Comment;
+global using RecipesApp.Shared.DTOs.Recipe;
 global using RecipesApp.Shared.Helpers;
 global using RecipesApp.Shared.Interfaces;
-global using RecipesApp.Shared.DTOs.Recipe;
-global using RecipesApp.Shared.DTOs.Comment;
-global using RecipesApp.Shared.DTOs.ApplicationUser;
 global using System.Net;
+global using Xunit;

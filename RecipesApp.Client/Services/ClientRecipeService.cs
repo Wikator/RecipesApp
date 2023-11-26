@@ -60,7 +60,7 @@ namespace RecipesApp.Client.Services
         {
             var url = $"{BaseUrl}?pageNumber={pageNumber}&pageSize={itemsPerPage}&orderBy={orderQuerry}&filter={filter}";
             var response = await Http.GetAsync(url);
-            
+
             var recipes = await response.Content.ReadFromJsonAsync<IEnumerable<RecipeReadOnlyDto>>()
                 ?? throw new Exception();
 
@@ -70,7 +70,7 @@ namespace RecipesApp.Client.Services
             var deserializedPaginationHeader = JsonConvert.DeserializeObject<PaginationHeader>(paginationHeader)
                 ?? throw new Exception();
 
-            return  new PagedList<RecipeReadOnlyDto>(recipes, deserializedPaginationHeader.CurrentPage,
+            return new PagedList<RecipeReadOnlyDto>(recipes, deserializedPaginationHeader.CurrentPage,
                 deserializedPaginationHeader.ItemsPerPage, deserializedPaginationHeader.TotalItems);
         }
 

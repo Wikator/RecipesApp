@@ -17,7 +17,7 @@ namespace RecipesApp.Services
         public async Task<ImageUploadResult> AddPhotoAsync(IFormFile file)
         {
             var uploadResult = new ImageUploadResult();
-            
+
             if (file.Length > 0)
             {
                 using var stream = file.OpenReadStream();
@@ -39,7 +39,7 @@ namespace RecipesApp.Services
         }
 
         public async Task<DeletionResult> DeletePhotoAsync(string publicId)
-        {        
+        {
             return await Cloudinary.DestroyAsync(new DeletionParams(publicId));
         }
     }

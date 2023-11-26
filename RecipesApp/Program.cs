@@ -9,6 +9,7 @@ using RecipesApp.Configurations;
 using RecipesApp.Data;
 using RecipesApp.Extensions;
 using RecipesApp.Middleware;
+using RecipesApp.Validators;
 using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,7 @@ builder.Services.AddAuthentication(options =>
         options.DefaultScheme = IdentityConstants.ApplicationScheme;
         options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
     })
+    .AddExternalServices(builder.Configuration)
     .AddIdentityCookies(options =>
     {
         options.ApplicationCookie?.Configure(cookieOptions =>
@@ -64,6 +66,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddUserValidator<UniqueEmailValidator>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 

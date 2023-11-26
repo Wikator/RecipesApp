@@ -20,8 +20,9 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
             <div class="form-floating mb-3">
-                <input type="text" value="@username" class="form-control" placeholder="Please choose your username." disabled />
-                <label for="username" class="form-label">Username</label>
+                <InputText @bind-Value="Input.UserName" class="form-control" placeholder="Please enter your user name." />
+                <label for="user-name" class="form-label">User name</label>
+                <ValidationMessage For="() => Input.UserName" class="text-danger" />
             </div>
             <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number." />
@@ -50,11 +51,23 @@
         username = await UserManager.GetUserNameAsync(user);
         phoneNumber = await UserManager.GetPhoneNumberAsync(user);
 
+        Input.UserName ??= username;
         Input.PhoneNumber ??= phoneNumber;
     }
 
     private async Task OnValidSubmitAsync()
     {
+        if (Input.UserName != username)
+        {
+            var setUserNameResult = await UserManager.SetUserNameAsync(user, Input.UserName);
+            if (!setUserNameResult.Succeeded)
+            {
+                RedirectManager
+                .RedirectToCurrentPageWithStatus(
+                    $"Error: {string.Join(",", setUserNameResult.Errors.Select(error => error.Description))}", HttpContext);
+            }
+        }
+
         if (Input.PhoneNumber != phoneNumber)
         {
             var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
@@ -73,5 +86,9 @@
         [Phone]
         [Display(Name = "Phone number")]
         public string? PhoneNumber { get; set; }
+
+        [Required]
+        [Display(Name = "User name")]
+        public string? UserName { get; set; }
     }
 }

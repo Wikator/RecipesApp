@@ -15,6 +15,6 @@ builder.Services.AddScoped<IRecipeService, ClientRecipeService>();
 builder.Services.AddScoped<ICommentService, ClientCommentService>();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
-builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) } );
+builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 await builder.Build().RunAsync();

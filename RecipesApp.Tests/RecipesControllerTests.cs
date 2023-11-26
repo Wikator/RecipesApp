@@ -3,33 +3,6 @@
     public class RecipesControllerTests
     {
         [Fact]
-        public async Task Get_Returns_OkResult_With_Recipes()
-        {
-            // Arrange
-            var recipeServiceMock = new Mock<IRecipeService>();
-            recipeServiceMock.Setup(x => x.GetAllAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new List<RecipeReadOnlyDetailsDto>
-            {
-                new()
-                {
-                    Id = 1,
-                    Name = "Test Recipe",
-                    Author = new ApplicationUserReadOnlyDto
-                    {
-                        UserName = "User 1"
-                    }
-                }
-            });
-
-            var controller = new RecipesController(recipeServiceMock.Object);
-
-            // Act
-            var result = await controller.Get(new PaginationParams());
-
-            // Assert
-            Assert.IsType<OkObjectResult>(result);
-        }
-
-        [Fact]
         public async Task Get_Returns_OkResult_With_PagedRecipes()
         {
             // Arrange
@@ -44,7 +17,7 @@
                         {
                             UserName = "User 1"
                         }
-                    } 
+                    }
                 }, 1, 5, 5));
 
             var controller = new RecipesController(recipeServiceMock.Object);
@@ -65,11 +38,11 @@
                 new ServiceResult<RecipeReadOnlyDetailsDto>
                 {
                     Data = new RecipeReadOnlyDetailsDto
-                    { 
+                    {
                         Id = 1,
                         Name = "Test Recipe",
                         Author = new ApplicationUserReadOnlyDto
-                        { 
+                        {
                             UserName = "User 1"
                         }
                     },

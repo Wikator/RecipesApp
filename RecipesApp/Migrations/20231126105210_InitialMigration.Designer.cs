@@ -12,8 +12,8 @@ using RecipesApp.Data;
 namespace RecipesApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231121094542_SetCommentAuthorIdToNullOnAuthorDelete")]
-    partial class SetCommentAuthorIdToNullOnAuthorDelete
+    [Migration("20231126105210_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -171,6 +171,7 @@ namespace RecipesApp.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -184,10 +185,12 @@ namespace RecipesApp.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("NormalizedEmail")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedUserName")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -207,20 +210,39 @@ namespace RecipesApp.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
+                        .IsUnique()
                         .HasDatabaseName("EmailIndex");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "23bd91c2-6d78-4c12-8b66-be229116d90e",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "ed33a042-ef9c-439e-b96c-bcdaeb8c6725",
+                            Email = "wiktor@szymulewicz.com",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = "WIKTOR@SZYMULEWICZ.COM",
+                            NormalizedUserName = "WIKATOR",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJmwram2sJHtUMia+tEPZ6MvQZ399xrux+oGp1p69xtPiwRLrPzfcDwG+SPa6YXz0w==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "",
+                            TwoFactorEnabled = false,
+                            UserName = "Wikator"
+                        });
                 });
 
             modelBuilder.Entity("RecipesApp.Entities.Comment", b =>
@@ -3750,6 +3772,35 @@ namespace RecipesApp.Migrations
                             RecipeId = 500,
                             Text = "Cool!"
                         });
+                });
+
+            modelBuilder.Entity("RecipesApp.Entities.Ingredient", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Amount")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RecipeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecipeId");
+
+                    b.ToTable("Ingredients");
                 });
 
             modelBuilder.Entity("RecipesApp.Entities.Picture", b =>
@@ -11381,6 +11432,17 @@ namespace RecipesApp.Migrations
                     b.Navigation("Recipe");
                 });
 
+            modelBuilder.Entity("RecipesApp.Entities.Ingredient", b =>
+                {
+                    b.HasOne("RecipesApp.Entities.Recipe", "Recipe")
+                        .WithMany("Ingredients")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Recipe");
+                });
+
             modelBuilder.Entity("RecipesApp.Entities.Picture", b =>
                 {
                     b.HasOne("RecipesApp.Entities.Recipe", "Recipe")
@@ -11411,6 +11473,8 @@ namespace RecipesApp.Migrations
             modelBuilder.Entity("RecipesApp.Entities.Recipe", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("Ingredients");
 
                     b.Navigation("Picture");
                 });

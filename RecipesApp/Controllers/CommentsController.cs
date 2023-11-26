@@ -15,21 +15,21 @@ namespace RecipesApp.Controllers
 
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<IActionResult> Get(int id) 
+        public async Task<IActionResult> Get(int id)
         {
-            var comments = (await CommentService.GetComments(id));
+            var comments = await CommentService.GetComments(id);
 
-            return Ok(comments);   
+            return Ok(comments);
         }
 
         [HttpPost]
         public async Task<IActionResult> Post(CommentUpsertDto dto)
         {
-            var comment = (await CommentService.AddComment(dto));
+            var comment = await CommentService.AddComment(dto);
 
             return comment.StatusCode switch
             {
-                HttpStatusCode.Created => CreatedAtAction(nameof(Get), new { id = dto.RecipeId }, comment!),
+                HttpStatusCode.Created => CreatedAtAction(nameof(Get), new { id = dto.RecipeId }, comment.Data!),
                 HttpStatusCode.Unauthorized => Unauthorized(comment.Message),
                 _ => throw new Exception()
             };
@@ -48,7 +48,7 @@ namespace RecipesApp.Controllers
                 _ => throw new Exception()
             };
         }
-        
+
         [HttpDelete]
         public async Task<IActionResult> Delete(int id)
         {

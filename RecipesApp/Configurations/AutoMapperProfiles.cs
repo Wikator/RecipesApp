@@ -25,7 +25,7 @@ namespace RecipesApp.Configurations
             CreateMap<RecipeCreateDto, Recipe>();
             CreateMap<RecipeUpdateDto, Recipe>();
             CreateMap<Ingredient, IngredientReadOnlyDto>();
-            CreateMap<IngredientUpsertDto,  Ingredient>();
+            CreateMap<IngredientUpsertDto, Ingredient>();
             CreateMap<ApplicationUser, ApplicationUserReadOnlyDto>();
         }
     }

@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
-using System.Net;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 using RecipesApp.Data;
 using RecipesApp.Entities;
+using RecipesApp.Extensions;
 using RecipesApp.Shared.DTOs.Comment;
 using RecipesApp.Shared.Helpers;
 using RecipesApp.Shared.Interfaces;
-using RecipesApp.Extensions;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper.QueryableExtensions;
+using System.Net;
 
 namespace RecipesApp.Services
 {
@@ -52,7 +52,7 @@ namespace RecipesApp.Services
 
             var userId = HttpContext.HttpContext?.User.GetLoggedInUserId();
 
-            if (comment.AuthorId != userId) 
+            if (comment.AuthorId != userId)
                 return ServiceResult.GenerateFailedResult(
                     "You can't delete other users' comments", HttpStatusCode.Unauthorized);
 
