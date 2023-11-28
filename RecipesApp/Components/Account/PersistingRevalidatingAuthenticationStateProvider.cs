@@ -87,13 +87,15 @@ namespace RecipesApp.Components.Account
             if (principal.Identity?.IsAuthenticated == true)
             {
                 var userId = principal.FindFirst(options.ClaimsIdentity.UserIdClaimType)?.Value;
+                var userName = principal.FindFirst(options.ClaimsIdentity.UserNameClaimType)?.Value;
                 var email = principal.FindFirst(options.ClaimsIdentity.EmailClaimType)?.Value;
 
-                if (userId != null && email != null)
+                if (userId != null && email != null && userName != null)
                 {
                     state.PersistAsJson(nameof(UserInfo), new UserInfo
                     {
                         UserId = userId,
+                        UserName = userName,
                         Email = email,
                     });
                 }
