@@ -6,11 +6,7 @@
 <div id="recipeDetailsContainer">
     @if (recipe is null)
     {
-        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
-            <div class="spinner-border text-primary" role="status" style="width: 5rem; height: 5rem;">
-                <span class="sr-only"></span>
-            </div>
-        </div>
+        <Spinner />
     }
     else
     {

@@ -124,6 +124,13 @@ namespace RecipesApp.Services
                 .CreatePagedList(pageNumber, itemsPerPage);
         }
 
+        public async Task<PagedList<RecipeReadOnlyDto>> GetPagedItemsAsync(int pageNumber, int itemsPerPage)
+        {
+            return await Db.Recipes
+                .ProjectTo<RecipeReadOnlyDto>(Mapper.ConfigurationProvider)
+                .CreatePagedList(pageNumber, itemsPerPage);
+        }
+
         public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetUserPagedItemsAsync(int pageNumber, int itemsPerPage, string? orderQuerry, string? filter)
         {
             var userId = HttpContext.HttpContext?.User.GetLoggedInUserId();

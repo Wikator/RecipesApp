@@ -1,0 +1,26 @@
+﻿<div class="col">
+    <div class="card shadow-sm">
+        @if (Recipe.ImageUrl is not null)
+        {
+            <img src="@Recipe.ImageUrl" class="card-img-top" height="225" role="img" aria-label="Thumbnail" focusable="false" />
+        }
+        else
+        {
+            <img src="https://i.stack.imgur.com/y9DpT.jpg" class="card-img-top" height="225" role="img" aria-label="Thumbnail" focusable="false" />
+        }
+
+        <div class="card-body">
+            <p class="card-text">@Recipe.Name</p>
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="btn-group">
+                    <NavLink href="@($"recipes/details/{Recipe.Id}")" class="btn btn-sm btn-outline-secondary">View</NavLink>
+                </div>
+                <small class="text-muted">@Recipe.Author.UserName</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public required RecipeReadOnlyDto Recipe { get; init; }
+}

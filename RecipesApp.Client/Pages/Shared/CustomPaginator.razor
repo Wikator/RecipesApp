@@ -1,0 +1,76 @@
+﻿@typeparam Dto
+
+<nav aria-label="Page navigation example">
+    <ul class="pagination">
+        <li class="page-item">
+            <button class="page-link" @onclick="@(_ => ChangePage(1))" aria-label="First">
+                <span aria-hidden="true">&laquo;</span>
+            </button>
+        </li>
+        <li class="page-item @(currentPage == 1 ? "disabled" : string.Empty)">
+            <button class="page-link"
+                @onclick="@(_ => ChangePage(currentPage - 1))" aria-label="Previous">
+                <span aria-hidden="true">&lsaquo;</span>
+            </button>
+        </li>
+        @for (var i = currentPage - 2; i <= currentPage + 2; i++)
+        {
+            if (i > 0 && i <= totalPages)
+            {
+                var pageNumber = i;
+                <li class="page-item @(i == currentPage ? "disabled" : string.Empty)">
+                    <button class="page-link" @onclick="@(_ => ChangePage(pageNumber))">@pageNumber</button>
+                </li>
+            }
+            else
+            {
+                var pageNumber = i;
+                <li class="page-item disabled">
+                    <button class="page-link">-</button>
+                </li>
+            }
+        }
+        <li class="page-item @(currentPage == totalPages ? "disabled" : string.Empty)">
+            <button class="page-link"
+                @onclick="@(_ => ChangePage(currentPage + 1))" aria-label="Next">
+                <span aria-hidden="true">&rsaquo;</span>
+            </button>
+        </li>
+        <li class="page-item">
+            <button class="page-link" @onclick="@(_ => ChangePage(totalPages))" aria-label="Last">
+                <span aria-hidden="true">&raquo;</span>
+            </button>
+        </li>
+    </ul>
+</nav>
+
+@code {
+    [Parameter]
+    public EventCallback<IEnumerable<Dto>> OnPageChange { get; set; }
+
+    [Parameter]
+    public required Func<int, int, Task<PagedList<Dto>>> Request { get; set; }
+
+    public int itemsPerPage { get; set; } = 6;
+    public int currentPage { get; set; } = 1;
+    public int totalPages { get; set; } = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var pagedRecipes = await Request(currentPage, itemsPerPage);
+        totalPages = pagedRecipes.TotalPages;
+        currentPage = pagedRecipes.PageNumber;
+        await OnPageChange.InvokeAsync(pagedRecipes);
+    }
+
+    public async Task ChangePage(int pageNumber)
+    {
+        if (pageNumber > 0 && pageNumber <= totalPages)
+        {
+            var pagedRecipes = await Request(pageNumber, itemsPerPage);
+            totalPages = pagedRecipes.TotalPages;
+            currentPage = pagedRecipes.PageNumber;
+            await OnPageChange.InvokeAsync(pagedRecipes);
+        }
+    }
+}

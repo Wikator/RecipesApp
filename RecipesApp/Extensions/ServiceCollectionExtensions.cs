@@ -17,9 +17,5 @@ namespace RecipesApp.Extensions
 
             services.AddHttpContextAccessor();
         }
-
-        public static void AddClientService(this IServiceCollection services)
-        {
-        }
     }
 }

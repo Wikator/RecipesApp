@@ -56,9 +56,27 @@ namespace RecipesApp.Client.Services
         }
 
         public async Task<PagedList<RecipeReadOnlyDto>> GetPagedItemsAsync(int pageNumber, int itemsPerPage,
-            string? orderQuerry, string? filter)
+            string? orderQuerry = null, string? filter = null)
         {
             var url = $"{BaseUrl}?pageNumber={pageNumber}&pageSize={itemsPerPage}&orderBy={orderQuerry}&filter={filter}";
+            var response = await Http.GetAsync(url);
+
+            var recipes = await response.Content.ReadFromJsonAsync<IEnumerable<RecipeReadOnlyDto>>()
+                ?? throw new Exception();
+
+            var paginationHeader = response.Headers.GetValues("Pagination").FirstOrDefault()
+                ?? throw new Exception();
+
+            var deserializedPaginationHeader = JsonConvert.DeserializeObject<PaginationHeader>(paginationHeader)
+                ?? throw new Exception();
+
+            return new PagedList<RecipeReadOnlyDto>(recipes, deserializedPaginationHeader.CurrentPage,
+                deserializedPaginationHeader.ItemsPerPage, deserializedPaginationHeader.TotalItems);
+        }
+
+        public async Task<PagedList<RecipeReadOnlyDto>> GetPagedItemsAsync(int pageNumber, int itemsPerPage)
+        {
+            var url = $"{BaseUrl}?pageNumber={pageNumber}&pageSize={itemsPerPage}";
             var response = await Http.GetAsync(url);
 
             var recipes = await response.Content.ReadFromJsonAsync<IEnumerable<RecipeReadOnlyDto>>()

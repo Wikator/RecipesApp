@@ -6,102 +6,29 @@
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mb-3">
             @if (recipes is null)
             {
-                <div class="alert alert-info">Loading...</div>
+                <Spinner />
             }
             else
             {
                 foreach (var recipe in recipes)
                 {
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            @if (recipe.ImageUrl is not null)
-                            {
-                                <img src="@recipe.ImageUrl" class="card-img-top" height="225" role="img" aria-label="Thumbnail" focusable="false" />
-                            }
-                            else
-                            {
-                                <img src="https://i.stack.imgur.com/y9DpT.jpg" class="card-img-top" height="225" role="img" aria-label="Thumbnail" focusable="false" />
-                            }
-
-                            <div class="card-body">
-                                <p class="card-text">@recipe.Name</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <NavLink href="@($"recipes/details/{recipe.Id}")" class="btn btn-sm btn-outline-secondary">View</NavLink>
-                                    </div>
-                                    <small class="text-muted">@recipe.Author.UserName</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <RecipeCard Recipe="recipe" />
                 }
             }
         </div>
-        <nav aria-label="Page navigation example">
-            <ul class="pagination">
-                <li class="page-item">
-                    <button class="page-link" @onclick="@(_ => OnPageChange(1))" aria-label="First">
-                        <span aria-hidden="true">&laquo;</span>
-                    </button>
-                </li>
-                <li class="page-item">
-                    <button class="page-link" @onclick="@(_ => OnPageChange(currentPage - 1))" aria-label="Previous">
-                        <span aria-hidden="true">&lsaquo;</span>
-                    </button>
-                </li>
-                @for (var i = currentPage - 2; i <= currentPage + 2; i++)
-                {
-                    if (i > 0 && i <= totalPages)
-                    {
-                        var pageNumber = i;
-                        <li class="page-item @(i == currentPage ? "disabled" : string.Empty)">
-                            <button class="page-link" @onclick="@(_ => OnPageChange(pageNumber))">@pageNumber</button>
-                        </li>
-                    }
-                    else
-                    {
-                        var pageNumber = i;
-                        <li class="page-item disabled">
-                            <button class="page-link">-</button>
-                        </li>
-                    }
-                }
-                <li class="page-item">
-                    <button class="page-link" @onclick="@(_ => OnPageChange(currentPage + 1))" aria-label="Next">
-                        <span aria-hidden="true">&rsaquo;</span>
-                    </button>
-                </li>
-                <li class="page-item">
-                    <button class="page-link" @onclick="@(_ => OnPageChange(totalPages))" aria-label="Last">
-                        <span aria-hidden="true">&raquo;</span>
-                    </button>
-                </li>
-            </ul>
-        </nav>
+        <CustomPaginator
+            Dto="RecipeReadOnlyDto"
+            Request="RecipeService.GetPagedItemsAsync"
+            OnPageChange="HandlePageChanged" />
     </div>
 </div>
 
 
 @code {
-    List<RecipeReadOnlyDto>? recipes;
-    int itemsPerPage = 6;
-    int currentPage = 1;
-    int totalPages = 1;
+    IEnumerable<RecipeReadOnlyDto>? recipes;  
 
-    protected override async Task OnInitializedAsync()
+    private void HandlePageChanged(IEnumerable<RecipeReadOnlyDto> newPage)
     {
-        var pagedRecipes = await RecipeService.GetPagedItemsAsync(currentPage, itemsPerPage, null, null);
-        recipes = pagedRecipes;
-        totalPages = pagedRecipes.TotalPages;
-        currentPage = pagedRecipes.PageNumber;
-    }
-
-
-    private async Task OnPageChange(int page)
-    {
-        var pagedRecipes = await RecipeService.GetPagedItemsAsync(page, itemsPerPage, null, null);
-        recipes = pagedRecipes;
-        totalPages = pagedRecipes.TotalPages;
-        currentPage = pagedRecipes.PageNumber;
+        recipes = newPage;
     }
 }

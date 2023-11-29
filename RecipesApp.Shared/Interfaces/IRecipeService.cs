@@ -24,6 +24,14 @@ namespace RecipesApp.Shared.Interfaces
             string? orderQuerry, string? filter);
 
         /// <summary>
+        /// Gets paginated recipes
+        /// </summary>
+        /// <param name="pageNumber">Number of a page</param>
+        /// <param name="itemsPerPage">How many recipes should there be on one page</param>
+        /// <returns>200 (with paginated recipes)</returns>
+        Task<PagedList<RecipeReadOnlyDto>> GetPagedItemsAsync(int pageNumber, int itemsPerPage);
+
+        /// <summary>
         /// Gets paginated recipes belgonging to authorized user
         /// </summary>
         /// <param name="pageNumber">Number of a page</param>

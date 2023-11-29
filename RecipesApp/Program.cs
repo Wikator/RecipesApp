@@ -27,13 +27,15 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddApplicationServices();
-builder.Services.AddClientService();
 
-builder.Services.AddSignalR().AddAzureSignalR(options =>
+if (builder.Environment.IsProduction())
 {
-    options.ServerStickyMode =
-        Microsoft.Azure.SignalR.ServerStickyMode.Required;
-});
+    builder.Services.AddSignalR().AddAzureSignalR(options =>
+    {
+        options.ServerStickyMode =
+            Microsoft.Azure.SignalR.ServerStickyMode.Required;
+    });
+}
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 
