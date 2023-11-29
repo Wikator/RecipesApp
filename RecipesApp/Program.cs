@@ -87,7 +87,7 @@ else
     app.UseHsts();
 }
 
-app.UseMiddleware<ErrorHandlingMiddleware>();
+// app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
