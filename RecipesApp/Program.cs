@@ -29,6 +29,12 @@ builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAu
 builder.Services.AddApplicationServices();
 builder.Services.AddClientService();
 
+builder.Services.AddSignalR().AddAzureSignalR(options =>
+{
+    options.ServerStickyMode =
+        Microsoft.Azure.SignalR.ServerStickyMode.Required;
+});
+
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 
 builder.Services.AddAuthentication(options =>
