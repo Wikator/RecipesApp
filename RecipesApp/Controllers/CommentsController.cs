@@ -49,7 +49,7 @@ namespace RecipesApp.Controllers
             };
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var commentResult = await CommentService.DeleteComment(id);

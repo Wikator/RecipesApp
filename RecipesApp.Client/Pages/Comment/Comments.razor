@@ -1,24 +1,47 @@
-﻿@inject ICommentService CommentService
+﻿@using System.ComponentModel.DataAnnotations
+@inject ICommentService CommentService
 @rendermode InteractiveAuto
 
 @if (CommentList is not null && RecipeId is not null)
 {
-    <div class="comments-container">
-    <h3 class="mt-4">Comments:</h3>
-    @foreach (var comment in CommentList)
-    {
-        <div class="comment">
-            <p><strong>@(comment.Author ?? "<DELETED USER>")</strong> @comment.Text</p>
+    <AuthorizeView Context="authContext">
+        <div class="comments-container">
+            <h3 class="mt-4">Comments:</h3>
+            @foreach (var comment in CommentList)
+            {
+                <ErrorMessage Message="@updateOrDeleteError" />
+                if (editModel is null || editModel.Id != comment.Id)
+                {
+                    <div class="comment">
+                        <p><strong>@(comment.Author ?? "<DELETED USER>")</strong> @comment.Text</p>
+                        @if (comment.Author == authContext.User.Identity?.Name)
+                        {
+                            <button class="btn btn-danger" @onclick="@(_ => DeleteComment(comment.Id))">Delete</button>
+                            <button class="btn btn-warning" @onclick="@(_ => EditComment(comment))">Update</button>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <EditForm Model="editModel" OnValidSubmit="UpdateComment">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <InputTextArea id="name" class="form-control" @bind-Value="editModel.Text" />
+                            <ValidationMessage For="@(() => editModel.Text)" />
+                        </div>
+                        <p class="text-danger">@error</p>
+                        <button class="btn btn-info mb-3" type="submit">Update!</button>
+                    </EditForm>
+                }
+
+            }
         </div>
-    }
-    </div>
-
-
+    </AuthorizeView>
+    
     @if (model is not null)
     {
         <AuthorizeView Context="authContext">
             <Authorized>
-                <button class="btn btn-danger mb-3" @onclick="(_ => model = null)">Discard comment</button>
                 <EditForm Model="model" OnValidSubmit="HandleSubmit">
                     <DataAnnotationsValidator />
                     <div class="mb-3">
@@ -26,6 +49,7 @@
                     </div>
                     <p class="text-danger">@error</p>
                     <button class="btn btn-info mb-3" type="submit">Add!</button>
+                    <button class="btn btn-danger mb-3" @onclick="_ => model = null">Discard comment</button>
                 </EditForm>
             </Authorized>
             <NotAuthorized>
@@ -35,7 +59,7 @@
     }
     else
     {
-        <button class="btn btn-info mt-3 mb-3" @onclick="(_ => model = new CommentUpsertDto() { RecipeId = RecipeId.Value })">Add comment</button>
+        <button class="btn btn-info mt-3 mb-3" @onclick="_ => model = new CommentUpsertDto { RecipeId = RecipeId.Value }">Add comment</button>
     } 
 }
 
@@ -44,7 +68,19 @@
     [Parameter, EditorRequired] public int? RecipeId { get; init; }
     [Parameter, EditorRequired] public List<CommentReadOnlyDto>? CommentList { get; init; }
     private CommentUpsertDto? model;
+    private UpdateModel? editModel;
     private string? error;
+    private string? updateOrDeleteError;
+
+    private class UpdateModel
+    {
+        public int Id { get; set; }
+        
+        [Required]
+        public required string Text { get; set; }
+        
+        public int RecipeId { get; set; }
+    }
 
     async Task HandleSubmit()
     {
@@ -61,6 +97,57 @@
         else
         {
             error = response.Message;
+        }
+    }
+    
+    async Task DeleteComment(int id)
+    {
+        var response = await CommentService.DeleteComment(id);
+
+        if (response.IsSuccessful)
+            CommentList?.Remove(CommentList.First(x => x.Id == id));
+        else
+            updateOrDeleteError = response.Message;
+    }
+    
+    void EditComment(CommentReadOnlyDto comment)
+    {
+        if (RecipeId is null)
+            return;
+        
+        editModel = new UpdateModel
+        {
+            Id = comment.Id,
+            Text = comment.Text,
+            RecipeId = RecipeId.Value
+        };
+    }
+    
+    async Task UpdateComment()
+    {
+        if (editModel is null)
+            return;
+        
+        var dto = new CommentUpsertDto
+        {
+            Text = editModel.Text,
+            RecipeId = editModel.RecipeId
+        };
+        
+        var response = await CommentService.UpdateComment(editModel.Id, dto);
+
+        if (response.IsSuccessful)
+        {
+            var comment = CommentList?.First(x => x.Id == editModel.Id);
+            if (comment is not null)
+            {
+                comment.Text = editModel.Text;
+                editModel = null;
+            }
+        }
+        else
+        {
+            updateOrDeleteError = response.Message;
         }
     }
 }
