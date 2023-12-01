@@ -57,8 +57,17 @@ namespace RecipesApp.Services
                     "You can't delete other users' comments", HttpStatusCode.Unauthorized);
 
             Db.Comments.Remove(comment);
-            await Db.SaveChangesAsync();
-            return ServiceResult.GenerateSuccessfulResult(HttpStatusCode.NoContent);
+
+            try
+            {
+                await Db.SaveChangesAsync();
+                return ServiceResult.GenerateSuccessfulResult(HttpStatusCode.NoContent);
+            }
+            catch (DbUpdateException)
+            {
+                return ServiceResult
+                    .GenerateFailedResult("Comment failed to delete", HttpStatusCode.BadRequest);
+            }
         }
 
         public async Task<IEnumerable<CommentReadOnlyDto>> GetComments(int recipeId)

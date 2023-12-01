@@ -29,7 +29,7 @@ namespace RecipesApp.Services
                 return ServiceResult<RecipeReadOnlyDetailsDto>
                     .GenerateFailedResult("User unauthorized", HttpStatusCode.Unauthorized);
 
-            var recipe = new Recipe()
+            var recipe = new Recipe
             {
                 Name = item.Name,
                 AuthorId = userId
@@ -91,8 +91,64 @@ namespace RecipesApp.Services
             }
 
             Db.Recipes.Remove(recipe);
-            await Db.SaveChangesAsync();
-            return ServiceResult.GenerateSuccessfulResult(HttpStatusCode.NoContent);
+            return await SaveChangesAsync();
+        }
+
+        public async Task<ServiceResult> AddReviewAsync(int id, int score)
+        {
+            var userId = HttpContext.HttpContext?.User.GetLoggedInUserId();
+            
+            if (userId is null)
+                return ServiceResult.GenerateFailedResult("User unauthorized", HttpStatusCode.Unauthorized);
+
+            var recipe = await Db.Recipes
+                .Include(r => r.RecipeReviews)
+                .SingleOrDefaultAsync(r => r.Id == id);
+            
+            if (recipe is null)
+                return ServiceResult.GenerateFailedResult("Recipe does not exist", HttpStatusCode.NotFound);
+            
+            var review = recipe.RecipeReviews!.SingleOrDefault(r => r.ApplicationUserId == userId);
+            
+            if (review is null)
+            {
+                review = new RecipeReview
+                {
+                    ApplicationUserId = userId,
+                    RecipeId = id,
+                    Score = score
+                };
+                recipe.RecipeReviews!.Add(review);
+            }
+            else
+            {
+                review.Score = score;
+            }
+
+            return await SaveChangesAsync();
+        }
+
+        public async Task<ServiceResult> RemoveReviewAsync(int id)
+        {
+            var userId = HttpContext.HttpContext?.User.GetLoggedInUserId();
+            
+            if (userId is null)
+                return ServiceResult.GenerateFailedResult("User unauthorized", HttpStatusCode.Unauthorized);
+
+            var recipe = await Db.Recipes
+                .Include(r => r.RecipeReviews)
+                .SingleOrDefaultAsync(r => r.Id == id);
+            
+            if (recipe is null)
+                return ServiceResult.GenerateFailedResult("Recipe does not exist", HttpStatusCode.NotFound);
+            
+            var review = recipe.RecipeReviews!.SingleOrDefault(r => r.ApplicationUserId == userId);
+            
+            if (review is null)
+                return ServiceResult.GenerateFailedResult("No review to delete", HttpStatusCode.BadRequest);
+            
+            recipe.RecipeReviews!.Remove(review);
+            return await SaveChangesAsync();
         }
 
         public async Task<ServiceResult<RecipeReadOnlyDetailsDto>> GetByIdAsync(int id)
@@ -105,7 +161,14 @@ namespace RecipesApp.Services
             if (recipe is null)
                 return ServiceResult<RecipeReadOnlyDetailsDto>.GenerateFailedResult("Recipe does not exist",
                     HttpStatusCode.NotFound);
-
+            
+            var userId = HttpContext.HttpContext?.User.GetLoggedInUserId();
+            var userReview = await Db.RecipeReviews
+                .Where(r => r.ApplicationUserId == userId && r.RecipeId == id)
+                .Select(r => (int?)r.Score)
+                .SingleOrDefaultAsync();
+            
+            recipe.UserReview = userReview;
             return ServiceResult<RecipeReadOnlyDetailsDto>.GenerateSuccessfulResult(recipe, HttpStatusCode.OK);
         }
 
@@ -124,14 +187,15 @@ namespace RecipesApp.Services
                 .CreatePagedList(pageNumber, itemsPerPage);
         }
 
-        public async Task<PagedList<RecipeReadOnlyDto>> GetPagedItemsAsync(int pageNumber, int itemsPerPage)
+        public Task<PagedList<RecipeReadOnlyDto>> GetPagedItemsAsync(int pageNumber, int itemsPerPage)
         {
-            return await Db.Recipes
+            return Db.Recipes
                 .ProjectTo<RecipeReadOnlyDto>(Mapper.ConfigurationProvider)
                 .CreatePagedList(pageNumber, itemsPerPage);
         }
 
-        public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetUserPagedItemsAsync(int pageNumber, int itemsPerPage, string? orderQuerry, string? filter)
+        public async Task<ServiceResult<PagedList<RecipeReadOnlyDto>>> GetUserPagedItemsAsync(int pageNumber,
+            int itemsPerPage, string? orderQuerry, string? filter)
         {
             var userId = HttpContext.HttpContext?.User.GetLoggedInUserId();
 
@@ -183,12 +247,10 @@ namespace RecipesApp.Services
 
             if (recipe.Ingredients is not null)
             {
-                foreach (var ingredient in recipe.Ingredients)
+                foreach (var ingredient in recipe.Ingredients.Where(ingredient =>
+                             !item.Ingredients.Select(i => i.Id).Contains(ingredient.Id)))
                 {
-                    if (!item.Ingredients.Select(i => i.Id).Contains(ingredient.Id))
-                    {
-                        Db.Remove(ingredient);
-                    }
+                    Db.Remove(ingredient);
                 }
             }
 
@@ -207,7 +269,7 @@ namespace RecipesApp.Services
                     return ServiceResult
                         .GenerateFailedResult("Image Failed to save", HttpStatusCode.BadRequest);
 
-                recipe.Picture = new()
+                recipe.Picture = new Picture
                 {
                     Url = uploadResult.SecureUrl.AbsoluteUri,
                     PublicId = uploadResult.PublicId
@@ -217,6 +279,19 @@ namespace RecipesApp.Services
             Db.Recipes.Update(recipe);
             await Db.SaveChangesAsync();
             return ServiceResult.GenerateSuccessfulResult(HttpStatusCode.NoContent);
+        }
+
+        private async Task<ServiceResult> SaveChangesAsync()
+        {
+            try
+            {
+                await Db.SaveChangesAsync();
+                return ServiceResult.GenerateSuccessfulResult(HttpStatusCode.NoContent);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return ServiceResult.GenerateFailedResult("Review failed to delete", HttpStatusCode.BadRequest);
+            }
         }
     }
 }

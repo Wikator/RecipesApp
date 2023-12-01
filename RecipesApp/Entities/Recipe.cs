@@ -17,5 +17,6 @@ namespace RecipesApp.Entities
 
         public List<Comment>? Comments { get; set; }
         public List<Ingredient>? Ingredients { get; set; }
+        public List<RecipeReview>? RecipeReviews { get; set; }
     }
 }

@@ -13,5 +13,6 @@ namespace RecipesApp.Shared.DTOs.Recipe
         public required ApplicationUserReadOnlyDto Author { get; init; }
         public List<CommentReadOnlyDto> Comments { get; init; } = [];
         public List<IngredientReadOnlyDto> Ingredients { get; init; } = [];
+        public int? UserReview { get; set; }
     }
 }

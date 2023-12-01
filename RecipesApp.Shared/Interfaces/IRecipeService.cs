@@ -66,5 +66,20 @@ namespace RecipesApp.Shared.Interfaces
         /// <returns>204, 400, 401, 404</returns>
         /// <exception cref="InvalidOperationException">Called when user is not authenticated</exception>
         Task<ServiceResult> DeleteAsync(int id);
+        
+        /// <summary>
+        /// Adds a review to a recipe, or updates it if it already exists
+        /// </summary>
+        /// <param name="id">Id of recipe</param>
+        /// <param name="score">Score, in range from 1 to 5</param>
+        /// <returns>204, 400, 401, 404</returns>
+        Task<ServiceResult> AddReviewAsync(int id, int score);
+        
+        /// <summary>
+        /// Removes a review from a recipe
+        /// </summary>
+        /// <param name="id">Id of recipe</param>
+        /// <returns>204, 400, 401, 404</returns>
+        Task<ServiceResult> RemoveReviewAsync(int id);
     }
 }

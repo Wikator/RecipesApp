@@ -13,7 +13,7 @@ namespace RecipesApp.Controllers
     {
         private ICommentService CommentService { get; } = commentService;
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         [AllowAnonymous]
         public async Task<IActionResult> Get(int id)
         {
@@ -35,7 +35,7 @@ namespace RecipesApp.Controllers
             };
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, CommentUpsertDto dto)
         {
             var commentResult = await CommentService.UpdateComment(id, dto);
@@ -49,7 +49,7 @@ namespace RecipesApp.Controllers
             };
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
             var commentResult = await CommentService.DeleteComment(id);

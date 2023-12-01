@@ -2,11 +2,11 @@
     <div class="card shadow-sm">
         @if (Recipe.ImageUrl is not null)
         {
-            <img src="@Recipe.ImageUrl" class="card-img-top" height="225" role="img" aria-label="Thumbnail" focusable="false" />
+            <img src="@Recipe.ImageUrl" class="card-img-top" height="225" role="img" aria-label="Thumbnail" focusable="false" alt="Recipe Image" />
         }
         else
         {
-            <img src="https://i.stack.imgur.com/y9DpT.jpg" class="card-img-top" height="225" role="img" aria-label="Thumbnail" focusable="false" />
+            <img src="https://i.stack.imgur.com/y9DpT.jpg" class="card-img-top" height="225" role="img" aria-label="Thumbnail" focusable="false" alt="Recipe Image" />
         }
 
         <div class="card-body">
@@ -15,7 +15,15 @@
                 <div class="btn-group">
                     <NavLink href="@($"recipes/details/{Recipe.Id}")" class="btn btn-sm btn-outline-secondary">View</NavLink>
                 </div>
-                <small class="text-muted">@Recipe.Author.UserName</small>
+                <small class="text-muted">@Recipe.Author</small>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <div class="star-rating">
+                @for (var i = 1; i <= 5; i++)
+                {
+                    <span class="@GetStarClass(i)"></span>
+                }
             </div>
         </div>
     </div>
@@ -23,4 +31,19 @@
 
 @code {
     [Parameter] public required RecipeReadOnlyDto Recipe { get; init; }
+
+    private string GetStarClass(int starNumber)
+    {
+        if (starNumber <= Recipe.Rating)
+        {
+            return "filled-star";
+        }
+
+        if (Math.Abs(starNumber - Math.Ceiling(Recipe.Rating)) < 0.5 && Recipe.Rating % 1 != 0)
+        {
+            return "half-star";
+        }
+
+        return "empty-star";
+    }
 }

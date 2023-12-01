@@ -39,6 +39,29 @@ namespace RecipesApp.Client.Services
             return ServiceResult.GenerateFailedResult(message, response.StatusCode);
         }
 
+        public async Task<ServiceResult> AddReviewAsync(int id, int score)
+        {
+            var body = new { score };
+            var response = await Http.PutAsJsonAsync($"{BaseUrl}{id}/review", body);
+            
+            if (response.IsSuccessStatusCode)
+                return ServiceResult.GenerateSuccessfulResult(response.StatusCode);
+
+            var message = await response.Content.ReadAsStringAsync();
+            return ServiceResult.GenerateFailedResult(message, response.StatusCode);
+        }
+
+        public async Task<ServiceResult> RemoveReviewAsync(int id)
+        {
+            var response = await Http.DeleteAsync($"{BaseUrl}{id}/review");
+            
+            if (response.IsSuccessStatusCode)
+                return ServiceResult.GenerateSuccessfulResult(response.StatusCode);
+
+            var message = await response.Content.ReadAsStringAsync();
+            return ServiceResult.GenerateFailedResult(message, response.StatusCode);
+        }
+
         public async Task<ServiceResult<RecipeReadOnlyDetailsDto>> GetByIdAsync(int id)
         {
             var response = await Http.GetAsync($"{BaseUrl}{id}");

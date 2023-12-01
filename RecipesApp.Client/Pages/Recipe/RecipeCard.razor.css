@@ -1,0 +1,29 @@
+﻿.star-rating {
+    font-size: 2em;
+}
+
+.star-rating span {
+    width: 1.1em;
+    height: 1em;
+}
+
+.star-rating span:before {
+    content: '\2605';
+    background: #FFD700;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.star-rating .empty-star:before {
+    content: '\2605';
+    background: #ccc;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.star-rating .half-star:before {
+    content: '\2605';
+    background: linear-gradient(90deg, #FFD700 50%, #ccc 50%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}

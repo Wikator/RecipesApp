@@ -55,7 +55,7 @@ namespace RecipesApp.Controllers
         }
 
         // GET api/recipes/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         [AllowAnonymous]
         public async Task<IActionResult> Get(int id)
         {
@@ -83,7 +83,7 @@ namespace RecipesApp.Controllers
         }
 
         // PUT api/recipes/5
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, RecipeUpdateDto recipeDto)
         {
             var result = await RecipeService.UpdateAsync(id, recipeDto);
@@ -96,9 +96,40 @@ namespace RecipesApp.Controllers
                 _ => throw new Exception()
             };
         }
+        
+        // PUT api/recipes/5/review
+        [HttpPut("{id:int}/review")]
+        public async Task<IActionResult> Rate(int id, RecipeReviewUpsertDto recipeRateDto)
+        {
+            var result = await RecipeService.AddReviewAsync(id, recipeRateDto.Score);
+
+            return result.StatusCode switch
+            {
+                HttpStatusCode.NoContent => NoContent(),
+                HttpStatusCode.Unauthorized => Unauthorized(result.Message),
+                HttpStatusCode.NotFound => NotFound(result.Message),
+                _ => throw new Exception()
+            };
+        }
+        
+        // DELETE api/recipes/5/review
+        [HttpDelete("{id:int}/review")]
+        public async Task<IActionResult> Rate(int id)
+        {
+            var result = await RecipeService.RemoveReviewAsync(id);
+
+            return result.StatusCode switch
+            {
+                HttpStatusCode.NoContent => NoContent(),
+                HttpStatusCode.Unauthorized => Unauthorized(result.Message),
+                HttpStatusCode.NotFound => NotFound(result.Message),
+                HttpStatusCode.BadRequest => BadRequest(result.Message),
+                _ => throw new Exception()
+            };
+        }
 
         // DELETE api/recipes/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await RecipeService.DeleteAsync(id);

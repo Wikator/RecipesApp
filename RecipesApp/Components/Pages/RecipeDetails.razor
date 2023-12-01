@@ -1,4 +1,5 @@
 ﻿@page "/recipes/details/{id:int}"
+@using System.ComponentModel.DataAnnotations
 @inject IRecipeService RecipeService
 @inject NavigationManager NavigationManager
 @attribute [StreamRendering]
@@ -34,6 +35,40 @@
                     <Comments CommentList="recipe.Comments" RecipeId="recipe.Id" />
 
                     <NavLink href="/" class="btn btn-secondary btn-back">Back to list</NavLink>
+                    
+                    <hr />
+                    
+                    @if (recipe.UserReview is null)
+                    {
+                        <div class="review-form-container">
+                            <p>Rate this recipe from 1 to 5</p>
+                            <EditForm FormName="AddReview" Model="Model" OnValidSubmit="Review" Enhance>
+                                <DataAnnotationsValidator />
+                                <div class="mb-3">
+                                    <label for="rating" class="form-label">Rating</label>
+                                    <InputNumber id="rating" class="form-control" @bind-Value="Model.Rating" />
+                                    <ValidationMessage For="@(() => Model.Rating)" />
+                                </div>
+                                <div class="mb-3">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                            </EditForm>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="user-rating-container">
+                            <form method="post"
+                                  @formname="DeleteReview"
+                                  @onsubmit="DeleteReview"
+                                  data-enhance>
+                                
+                                <p>Your rating: @(recipe.UserReview)/5</p>
+                                <button type="submit" class="btn btn-danger">Delete Review</button>
+                                <AntiforgeryToken />
+                            </form>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -43,6 +78,15 @@
 @code {
     [Parameter] public int? Id { get; set; }
     private RecipeReadOnlyDetailsDto? recipe;
+    
+    [SupplyParameterFromForm]
+    private ReviewModel Model { get; set; } = new();
+
+    class ReviewModel
+    {
+        [Range(1, 5)]
+        public int Rating { get; set; }
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -57,7 +101,38 @@
             if (result.Data is null)
                 NavigationManager.NavigateTo("/");
             else
+            {
                 recipe = result.Data;
+                // Model.Rating = result.Data.UserReview ?? 0;
+            }
+        }
+    }
+
+    async Task Review()
+    {
+        if (Id is null || recipe is null)
+            return;
+        
+        var result = await RecipeService.AddReviewAsync(Id.Value, Model.Rating);
+        
+        if (result.IsSuccessful)
+        {
+            recipe.UserReview = Model.Rating;
+            Model = new ReviewModel();
+        }
+    }
+    
+    async Task DeleteReview()
+    {
+        if (Id is null || recipe is null)
+            return;
+
+        var result = await RecipeService.RemoveReviewAsync(Id.Value);
+
+        if (result.IsSuccessful)
+        {
+            recipe.UserReview = null;
+            Model = new ReviewModel();
         }
     }
 }

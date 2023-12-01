@@ -12,14 +12,19 @@ namespace RecipesApp.Configurations
     {
         public AutoMapperProfiles()
         {
-            CreateMap<Recipe, RecipeReadOnlyDto>().ForMember(src => src.ImageUrl,
-                conf => conf.MapFrom(dest => dest.Picture == null ? null : dest.Picture.Url));
+            CreateMap<Recipe, RecipeReadOnlyDto>()
+                .ForMember(dest => dest.ImageUrl,
+                    conf => conf.MapFrom(src => src.Picture == null ? null : src.Picture.Url))
+                .ForMember(dest => dest.Rating,
+                    conf => conf.MapFrom(src => src.RecipeReviews!.Count != 0 ? src.RecipeReviews!.Average(r => r.Score) : 0));
 
-            CreateMap<Recipe, RecipeReadOnlyDetailsDto>().ForMember(src => src.ImageUrl,
-                conf => conf.MapFrom(dest => dest.Picture == null ? null : dest.Picture.Url));
+            CreateMap<Recipe, RecipeReadOnlyDetailsDto>()
+                .ForMember(dest => dest.ImageUrl,
+                conf => conf.MapFrom(src => src.Picture == null ? null : src.Picture.Url));
 
-            CreateMap<Comment, CommentReadOnlyDto>().ForMember(src => src.Author,
-                conf => conf.MapFrom(dest => dest.Author == null ? null : dest.Author.UserName));
+            CreateMap<Comment, CommentReadOnlyDto>()
+                .ForMember(dest => dest.Author,
+                conf => conf.MapFrom(src => src.Author == null ? null : src.Author.UserName));
 
             CreateMap<CommentUpsertDto, Comment>();
             CreateMap<RecipeCreateDto, Recipe>();

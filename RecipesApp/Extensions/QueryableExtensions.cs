@@ -11,7 +11,7 @@ namespace RecipesApp.Extensions
     {
         public static async Task<PagedList<TDto>> CreatePagedList<TDto>(this IQueryable<TDto> query, int pageNumber, int pageSize)
         {
-            int count = await query.CountAsync();
+            var count = await query.CountAsync();
             IEnumerable<TDto> items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
             return new PagedList<TDto>(items, pageNumber, pageSize, count);
         }
@@ -37,14 +37,11 @@ namespace RecipesApp.Extensions
                 if (objectProperty == null)
                     continue;
                 var sortingOrder = param.EndsWith(" desc") ? "descending" : "ascending";
-                orderQueryBuilder.Append($"{objectProperty.Name.ToString()} {sortingOrder}, ");
+                orderQueryBuilder.Append($"{objectProperty.Name} {sortingOrder}, ");
             }
 
             var orderQuery = orderQueryBuilder.ToString().TrimEnd(',', ' ');
-            if (string.IsNullOrWhiteSpace(orderQuery))
-                return entities;
-
-            return entities.OrderBy(orderQuery);
+            return string.IsNullOrWhiteSpace(orderQuery) ? entities : entities.OrderBy(orderQuery);
         }
     }
 }
